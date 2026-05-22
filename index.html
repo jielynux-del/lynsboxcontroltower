@@ -234,8 +234,26 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .gate-btn{background:linear-gradient(135deg,#e8789a,#d45c8a);border:none;border-radius:99px;color:#fff;font-size:16px;font-weight:700;padding:10px 36px;cursor:pointer;font-family:'Nunito',sans-serif;box-shadow:0 4px 14px rgba(232,120,154,.35);transition:opacity .15s,transform .1s}
 .gate-btn:active{opacity:.85;transform:scale(.97)}
 
-.cfg-page{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;overflow-y:auto}
-.cfg-page.open{display:block}
+/* kebab menu for mobile cards */
+.ckebab-btn{display:none;position:absolute;top:6px;right:6px;background:var(--cbg);border:1px solid var(--cborder);border-radius:7px;width:24px;height:24px;cursor:pointer;align-items:center;justify-content:center;font-size:13px;color:var(--text-2);box-shadow:var(--shsm);z-index:2}
+.ckebab-menu{display:none;position:absolute;top:32px;right:6px;background:var(--cbg);border:1px solid var(--cborder);border-radius:10px;box-shadow:var(--shmd);z-index:10;overflow:hidden;min-width:100px}
+.ckebab-menu.open{display:block}
+.ckebab-item{display:flex;align-items:center;gap:7px;padding:9px 13px;font-size:12px;font-weight:600;color:var(--text-1);cursor:pointer;font-family:'Nunito',sans-serif;transition:background .12s}
+.ckebab-item:hover{background:var(--accent-light)}
+
+/* cfg slide-up overlay */
+.cfg-page{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1)}
+.cfg-page.open{display:block;transform:translateY(0)}
+.cfg-overlay{display:none;position:fixed;inset:0;background:rgba(30,0,20,.45);z-index:299;opacity:0;transition:opacity .35s ease}
+.cfg-overlay.open{display:block;opacity:1}
+/* on mobile: show only top 5% of bg, rounded top corners */
+@media (max-width:768px){
+  .cfg-page{border-radius:20px 20px 0 0;top:5%}
+  .cfg-hdr .cfg-back{display:none}
+  .cfg-close-btn{display:flex !important}
+}
+.cfg-close-btn{display:none;background:none;border:none;font-size:18px;color:var(--text-m);cursor:pointer;padding:4px 8px;line-height:1}
+.cfg-close-btn:hover{color:var(--text-1)}
 .cfg-hdr{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border-h);padding:14px 28px;display:flex;align-items:center;gap:12px}
 .cfg-back{background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-2);font-family:'Nunito',sans-serif;display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:var(--pill);transition:background .14s,color .14s}
 .cfg-back:hover{background:var(--accent-light);color:var(--accent-deep)}
@@ -274,11 +292,11 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
     z-index:100;
   }
 
-  /* hide big emoji on mobile */
+  /* hide big emoji on mobile — shown inline in title instead */
   .hdr > span:first-child{display:none}
 
   .hdr-title{
-    font-size:11px;
+    font-size:13px;
     font-weight:700;
     flex:1;
     text-align:left;
@@ -341,8 +359,18 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   /* KANBAN */
   .kanban{padding:0 14px 48px;gap:10px}
   .pcol{flex:0 0 210px;min-width:210px}
+
+  /* CARDS — show kebab, hide hover actions */
+  .cactions{display:none !important}
+  .ckebab-btn{display:flex}
+
+  /* STATS — posts and collabs side by side, full width */
+  .smtiles{display:flex;flex-direction:row;gap:10px;width:100%}
+  .smtiles .stile{flex:1;min-width:0}
 }
 
+.hdr-mob-em{display:none}
+@media(max-width:768px){.hdr-mob-em{display:inline}.hdr>span:first-child{display:none}}
 /* hide mobile sort on desktop */
 .sort-mobile-wrap{display:none}
 </style>
@@ -362,7 +390,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 
 <div class="hdr">
   <span style="font-size:26px;line-height:1;flex-shrink:0">👸🏻</span>
-  <div class="hdr-title">Lynsbox's Content Control Tower</div>
+  <div class="hdr-title"><span class="hdr-mob-em" style="margin-right:6px">👸🏻</span>Lynsbox's Content Control Tower</div>
   <div class="hdr-right">
     <div id="theme-pills" style="display:flex;gap:6px;align-items:center"></div>
     <!-- mobile theme dropdown -->
@@ -487,11 +515,15 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 </div></div>
 
 <!-- CONFIG -->
+<div class="cfg-overlay" id="cfg-overlay"></div>
 <div class="cfg-page" id="cfg-page">
   <div class="cfg-hdr">
     <button class="cfg-back" id="btn-cfgclose">&#8592; Back</button>
     <div class="cfg-title">⚙️ Settings</div>
-    <button class="cfg-savebtn" id="btn-cfgsave">Save</button>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="cfg-savebtn" id="btn-cfgsave">Save</button>
+      <button class="cfg-close-btn" id="btn-cfgclose-x">✕</button>
+    </div>
   </div>
   <div class="cfg-body">
     <div class="cfg-stitle">Pillar names &amp; descriptions</div>
@@ -791,24 +823,62 @@ function updatePillarSelects() {
 }
 
 /* ── SPARKLINE ── */
+function getThemeAccent() {
+  var t = document.documentElement.getAttribute('data-theme') || '';
+  if (t === 'diamond') return {line:'#4cb89a', fill:'rgba(76,184,154,.12)', dot:'#4cb89a'};
+  if (t === 'raven')   return {line:'#9b7fd4', fill:'rgba(155,127,212,.15)', dot:'#9b7fd4'};
+  if (t === 'paper')   return {line:'#888', fill:'rgba(136,136,136,.1)', dot:'#888'};
+  return {line:'#e8789a', fill:'rgba(232,120,154,.12)', dot:'#e8789a'};
+}
 function drawSpark() {
   var cv=document.getElementById('flw-spark'); if(!cv)return;
-  cv.width=cv.parentElement.offsetWidth||280; cv.height=54;
+  var PAD_B=22; /* bottom padding for labels */
+  cv.width=cv.parentElement.offsetWidth||280; cv.height=72;
   var ctx=cv.getContext('2d'), w=cv.width, h=cv.height;
   ctx.clearRect(0,0,w,h);
+  var ac = getThemeAccent();
   var data=followers.map(function(e){return e.count;});
-  if(data.length<2){if(data.length===1){ctx.beginPath();ctx.arc(w/2,h/2,4,0,Math.PI*2);ctx.fillStyle='#e8789a';ctx.fill();}return;}
+  var dates=followers.map(function(e){return e.date||'';});
+  if(data.length<2){
+    if(data.length===1){ctx.beginPath();ctx.arc(w/2,(h-PAD_B)/2,4,0,Math.PI*2);ctx.fillStyle=ac.dot;ctx.fill();}
+    return;
+  }
+  var chartH=h-PAD_B-4;
   var mn=Math.min.apply(null,data), mx=Math.max.apply(null,data), rng=mx-mn||1;
-  var pts=data.map(function(v,i){return{x:6+(i/(data.length-1))*(w-12),y:h-6-((v-mn)/rng)*(h-14)};});
+  var pts=data.map(function(v,i){return{x:6+(i/(data.length-1))*(w-12),y:chartH-((v-mn)/rng)*(chartH-14)+4};});
+  /* fill */
   ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
   for(var i=1;i<pts.length;i++){var mx2=(pts[i-1].x+pts[i].x)/2,my=(pts[i-1].y+pts[i].y)/2;ctx.quadraticCurveTo(pts[i-1].x,pts[i-1].y,mx2,my);}
   ctx.lineTo(pts[pts.length-1].x,pts[pts.length-1].y);
-  ctx.strokeStyle='#e8789a';ctx.lineWidth=2;ctx.stroke();
-  ctx.lineTo(pts[pts.length-1].x,h);ctx.lineTo(pts[0].x,h);ctx.closePath();
-  ctx.fillStyle='rgba(232,120,154,.12)';ctx.fill();
+  ctx.strokeStyle=ac.line;ctx.lineWidth=2;ctx.stroke();
+  ctx.lineTo(pts[pts.length-1].x,chartH);ctx.lineTo(pts[0].x,chartH);ctx.closePath();
+  ctx.fillStyle=ac.fill;ctx.fill();
+  /* dot at last point */
   var last=pts[pts.length-1];
-  ctx.beginPath();ctx.arc(last.x,last.y,4,0,Math.PI*2);ctx.fillStyle='#e8789a';ctx.fill();
+  ctx.beginPath();ctx.arc(last.x,last.y,4,0,Math.PI*2);ctx.fillStyle=ac.dot;ctx.fill();
   ctx.beginPath();ctx.arc(last.x,last.y,2,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
+  /* date labels — max 5, evenly spaced */
+  if(dates.length>0){
+    ctx.font='600 9px Nunito,sans-serif';
+    ctx.fillStyle='rgba(160,120,140,.7)';
+    ctx.textAlign='center';
+    var maxLabels=Math.min(5,data.length);
+    var step=Math.floor((data.length-1)/(maxLabels-1))||1;
+    var labelIdx=[];
+    for(var li=0;li<data.length;li+=step){ labelIdx.push(li); if(labelIdx.length>=maxLabels)break; }
+    if(labelIdx[labelIdx.length-1]!==data.length-1) labelIdx[labelIdx.length-1]=data.length-1;
+    labelIdx.forEach(function(idx){
+      var rawDate=dates[idx]||'';
+      /* parse DD MMM YYYY or any format → DD/MM */
+      var label=rawDate;
+      var m=rawDate.match(/(\d{1,2})\s+(\w{3})/);
+      if(m){
+        var months={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+        label=(m[1].length===1?'0'+m[1]:m[1])+'/'+(months[m[2]]||m[2]);
+      }
+      ctx.fillText(label, pts[idx].x, h-2);
+    });
+  }
 }
 
 /* ── STATS ── */
@@ -916,45 +986,69 @@ function makeCard(post) {
   /* action buttons */
   var act=document.createElement('div'); act.className='cactions';
 
-  /* pin button — always 📌, toggling pinned state for current sort view */
-  var pinnedCountInSort = posts.filter(function(p){ return p.pillar===post.pillar && isPinned(p,sort); }).length;
-  var canPin = !pinned && pinnedCountInSort < 5;
-  if(pinned || canPin){
-    var pb=document.createElement('button'); pb.className='cact-btn'; pb.title=pinned?'Unpin':'Pin to top';
-    pb.textContent='📌';
-    pb.style.opacity = pinned ? '1' : '0.45';
-    pb.addEventListener('click',function(e){
-      e.stopPropagation();
-      var p=posts.find(function(x){return x.id===post.id;});
-      if(!p)return;
-      if(isPinned(p,sort)){
-        setPinned(p,sort,false);
-      } else {
-        var cnt=posts.filter(function(x){return x.pillar===p.pillar&&isPinned(x,sort);}).length;
-        if(cnt>=5){alert('Max 5 pins per pillar');return;}
-        setPinned(p,sort,true);
-        var pinnedPosts=posts.filter(function(x){return x.pillar===p.pillar&&isPinned(x,sort);});
-        var minOrd=Math.min.apply(null,pinnedPosts.map(function(x){return getOrd(x.id,sort);}));
-        setOrd(p.id,sort,minOrd-10);
-      }
-      save(); renderKanban();
-    });
-    act.appendChild(pb);
+  /* kebab button (mobile only — shown via CSS) */
+  var kbtn=document.createElement('button'); kbtn.className='ckebab-btn'; kbtn.textContent='⋮';
+  var kmenu=document.createElement('div'); kmenu.className='ckebab-menu';
+  kbtn.addEventListener('click',function(e){
+    e.stopPropagation();
+    document.querySelectorAll('.ckebab-menu.open').forEach(function(m){if(m!==kmenu)m.classList.remove('open');});
+    kmenu.classList.toggle('open');
+  });
+  document.addEventListener('click',function(){ kmenu.classList.remove('open'); },{once:false});
+
+  /* shared action handlers */
+  function doPinAction(e){ e.stopPropagation();
+    var p=posts.find(function(x){return x.id===post.id;}); if(!p)return;
+    if(isPinned(p,sort)){ setPinned(p,sort,false); }
+    else {
+      var cnt=posts.filter(function(x){return x.pillar===p.pillar&&isPinned(x,sort);}).length;
+      if(cnt>=5){alert('Max 5 pins per pillar');return;}
+      setPinned(p,sort,true);
+      var pinnedPosts=posts.filter(function(x){return x.pillar===p.pillar&&isPinned(x,sort);});
+      var minOrd=Math.min.apply(null,pinnedPosts.map(function(x){return getOrd(x.id,sort);}));
+      setOrd(p.id,sort,minOrd-10);
+    }
+    save(); renderKanban();
   }
-
-  var eb=document.createElement('button'); eb.className='cact-btn'; eb.textContent='✏️'; eb.title='Edit';
-  eb.addEventListener('click',function(e){ e.stopPropagation(); openEdit(post.id); });
-  act.appendChild(eb);
-
-  var db=document.createElement('button'); db.className='cact-btn'; db.textContent='🗑'; db.title='Delete';
-  db.addEventListener('click',function(e){
+  function doEditAction(e){ e.stopPropagation(); openEdit(post.id); }
+  function doDeleteAction(e){
     e.stopPropagation();
     if(confirm('Are you sure? This can\'t be undone.')){
       posts=posts.filter(function(p){return p.id!==post.id;});
       save(); renderKanban();
     }
-  });
+  }
+
+  /* pin button — always 📌, toggling pinned state for current sort view */
+  var pinnedCountInSort = posts.filter(function(p){ return p.pillar===post.pillar && isPinned(p,sort); }).length;
+  var canPin = !pinned && pinnedCountInSort < 5;
+  if(pinned || canPin){
+    var pb=document.createElement('button'); pb.className='cact-btn'; pb.title=pinned?'Unpin':'Pin to top';
+    pb.textContent='📌'; pb.style.opacity = pinned ? '1' : '0.45';
+    pb.addEventListener('click',doPinAction);
+    act.appendChild(pb);
+    /* kebab pin item */
+    var kpin=document.createElement('div'); kpin.className='ckebab-item'; kpin.textContent=pinned?'📌 Unpin':'📌 Pin to top';
+    kpin.addEventListener('click',function(e){ kmenu.classList.remove('open'); doPinAction(e); });
+    kmenu.appendChild(kpin);
+  }
+
+  var eb=document.createElement('button'); eb.className='cact-btn'; eb.textContent='✏️'; eb.title='Edit';
+  eb.addEventListener('click',doEditAction);
+  act.appendChild(eb);
+  var kedit=document.createElement('div'); kedit.className='ckebab-item'; kedit.textContent='✏️ Edit';
+  kedit.addEventListener('click',function(e){ kmenu.classList.remove('open'); doEditAction(e); });
+  kmenu.appendChild(kedit);
+
+  var db=document.createElement('button'); db.className='cact-btn'; db.textContent='🗑'; db.title='Delete';
+  db.addEventListener('click',doDeleteAction);
   act.appendChild(db);
+  var kdel=document.createElement('div'); kdel.className='ckebab-item'; kdel.textContent='🗑 Delete'; kdel.style.color='#c41010';
+  kdel.addEventListener('click',function(e){ kmenu.classList.remove('open'); doDeleteAction(e); });
+  kmenu.appendChild(kdel);
+
+  card.appendChild(kbtn);
+  card.appendChild(kmenu);
   card.appendChild(act);
 
   /* drag events */
@@ -1151,9 +1245,22 @@ function openCfg(){
     var i3=document.createElement('textarea'); i3.className='cfg-ta'; i3.id='cd'+n; i3.value=p.desc; f3.appendChild(i3); card.appendChild(f3);
     c.appendChild(card);
   });
-  document.getElementById('cfg-page').classList.add('open');
+  var overlay=document.getElementById('cfg-overlay');
+  var page=document.getElementById('cfg-page');
+  if(overlay){ overlay.style.display='block'; requestAnimationFrame(function(){ overlay.classList.add('open'); }); }
+  page.style.display='block';
+  requestAnimationFrame(function(){ page.classList.add('open'); });
 }
-function closeCfg(){ document.getElementById('cfg-page').classList.remove('open'); }
+function closeCfg(){
+  var overlay=document.getElementById('cfg-overlay');
+  var page=document.getElementById('cfg-page');
+  page.classList.remove('open');
+  if(overlay){ overlay.classList.remove('open'); }
+  setTimeout(function(){
+    page.style.display='none';
+    if(overlay) overlay.style.display='none';
+  }, 380);
+}
 function saveCfg(){
   for(var i=1;i<=5;i++){
     pillars[i-1].name=document.getElementById('cn'+i).value.trim();
@@ -1187,7 +1294,9 @@ document.getElementById('btn-esave').addEventListener('click',saveEdit);
 document.getElementById('btn-flwclose').addEventListener('click',closeFlw);
 document.getElementById('btn-flwlog').addEventListener('click',logFlw);
 document.getElementById('btn-cfgclose').addEventListener('click',closeCfg);
+document.getElementById('btn-cfgclose-x').addEventListener('click',closeCfg);
 document.getElementById('btn-cfgsave').addEventListener('click',saveCfg);
+document.getElementById('cfg-overlay').addEventListener('click',closeCfg);
 document.getElementById('fi-title').addEventListener('input',function(){ if(this.value)this.value=this.value[0].toUpperCase()+this.value.slice(1); });
 document.getElementById('ei-title').addEventListener('input',function(){ if(this.value)this.value=this.value[0].toUpperCase()+this.value.slice(1); });
 document.getElementById('tz-f').addEventListener('click',function(){ document.getElementById('tf-f').click(); });
