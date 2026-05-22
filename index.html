@@ -250,41 +250,43 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .cfg-fld label{font-size:10px;color:var(--text-m);font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px}
 .cfg-inp,.cfg-ta{width:100%;border:1px solid var(--iborder);border-radius:10px;padding:8px 12px;font-size:13px;font-family:'Nunito',sans-serif;font-weight:500;color:var(--text-1);background:var(--ibg);outline:none;transition:border-color .15s}
 .cfg-inp:focus,.cfg-ta:focus{border-color:var(--accent)}
+/* THEME DROPDOWN (mobile) */
+.theme-drop-wrap{position:relative;display:none}
+.theme-drop-btn{display:flex;align-items:center;gap:4px;border:1px solid var(--cborder);border-radius:var(--pill);padding:5px 10px;background:var(--cbg);cursor:pointer;font-size:14px;box-shadow:var(--shsm)}
+.theme-drop-btn .td-chevron{font-size:8px;color:var(--text-m);line-height:1}
+.theme-drop-menu{display:none;position:absolute;top:calc(100% + 6px);right:0;background:var(--cbg);border:1px solid var(--cborder);border-radius:12px;box-shadow:var(--shmd);overflow:hidden;z-index:200;min-width:130px}
+.theme-drop-menu.open{display:block}
+.theme-drop-item{display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-1);font-family:'Nunito',sans-serif;transition:background .12s}
+.theme-drop-item:hover{background:var(--accent-light)}
+.theme-drop-item.active{color:var(--accent-deep)}
+
 /* ── MOBILE ── */
 @media (max-width: 768px) {
 
   /* NAV BAR */
   .hdr{
-    padding:16px 14px;
+    padding:14px 14px;
     flex-wrap:nowrap;
     align-items:center;
     gap:8px;
     position:sticky;
     top:0;
     z-index:100;
-    transition:padding .25s ease, transform .25s ease;
-    will-change:transform;
   }
-  .hdr.hdr-compact{padding:10px 14px}
-  .hdr.hdr-hidden{transform:translateY(-110%)}
 
-  /* hide big emoji on mobile to save space */
+  /* hide big emoji on mobile */
   .hdr > span:first-child{display:none}
 
   .hdr-title{
-    font-size:13px;
+    font-size:11px;
     font-weight:700;
     flex:1;
     text-align:left;
     white-space:nowrap;
     overflow:hidden;
     text-overflow:ellipsis;
-    transition:max-height .25s ease, opacity .25s ease;
-    max-height:40px;
-    opacity:1;
     min-width:0;
   }
-  .hdr.hdr-compact .hdr-title{max-height:0;opacity:0;pointer-events:none;margin:0}
 
   .hdr-right{
     flex-wrap:nowrap;
@@ -294,27 +296,24 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   }
   .hdr-divider{display:none}
 
-  /* theme pills smaller */
-  #theme-pills{gap:3px !important}
-  .theme-pill{padding:4px 6px !important;border-radius:10px !important}
-  .theme-pill span.em{font-size:11px}
+  /* hide desktop theme pills, show dropdown */
+  #theme-pills{display:none !important}
+  .theme-drop-wrap{display:block}
 
   /* log post button smaller */
-  .btn-logpost{padding:7px 12px !important;font-size:12px !important}
-
-  /* settings button */
+  .btn-logpost{padding:7px 11px !important;font-size:12px !important}
   .btn-settings{font-size:14px !important;padding:4px 6px !important}
 
-  /* STATS */
-  .stats{padding:14px 14px 12px;gap:10px;flex-wrap:wrap}
-  .flw-tile{min-width:0;flex:1 1 100%}
+  /* STATS — follower tile full width, then posts+collabs side by side */
+  .stats{padding:14px 14px 12px;gap:10px;flex-direction:column}
+  .flw-tile{width:100%}
   .smtiles{display:flex;gap:10px;width:100%}
-  .stile{flex:1}
+  .stile{flex:1;min-width:0}
 
   /* DIVIDER */
   .divrow{padding:0 14px 10px}
 
-  /* TOOLBAR — hide desktop sort buttons, show dropdown */
+  /* TOOLBAR */
   .toolbar{padding:0 14px 12px;gap:6px;display:flex;align-items:center}
   .sort-btn{display:none !important}
   .tbar-lbl{display:none !important}
@@ -365,7 +364,15 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   <span style="font-size:26px;line-height:1;flex-shrink:0">👸🏻</span>
   <div class="hdr-title">Lynsbox's Content Control Tower</div>
   <div class="hdr-right">
-    <div id="theme-pills" style="display:flex;gap:6px;align-items:center"><div class="theme-pill active" title="Princess" style="background: rgb(244, 198, 224);"><span class="em">🌸</span></div><div class="theme-pill" title="Diamond" style="background: rgb(198, 238, 228);"><span class="em">💎</span></div><div class="theme-pill" title="Raven" style="background: rgb(30, 26, 46);"><span class="em">🖤</span></div><div class="theme-pill" title="Paper" style="background: rgb(240, 240, 240);"><span class="em">🤍</span></div></div>
+    <div id="theme-pills" style="display:flex;gap:6px;align-items:center"></div>
+    <!-- mobile theme dropdown -->
+    <div class="theme-drop-wrap" id="theme-drop-wrap">
+      <button class="theme-drop-btn" id="theme-drop-btn">
+        <span id="theme-drop-em">🌸</span>
+        <span class="td-chevron">▼</span>
+      </button>
+      <div class="theme-drop-menu" id="theme-drop-menu"></div>
+    </div>
     <div class="hdr-divider"></div>
     <button class="btn-settings" id="btn-settings">⚙️</button>
     <button class="btn-logpost" id="btn-logpost">Log Post</button>
@@ -419,7 +426,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 <div class="mbg" id="m-log"><div class="modal">
   <div class="mtitle">Log Post</div>
   <div class="fgrp"><label class="flbl">Thumbnail</label>
-    <div class="thumb-zone" id="tz-f"><span style="font-size:20px">📷</span><span>Tap to upload</span></div>
+    <div class="thumb-zone" id="tz-f"><span style="font-size:20px">📷</span><span>Tap to upload or paste</span></div>
     <input type="file" id="tf-f" accept="image/*" style="display:none">
     <input type="hidden" id="tu-f">
   </div>
@@ -443,7 +450,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 <div class="mbg" id="m-edit"><div class="modal">
   <div class="mtitle">Edit Post</div>
   <div class="fgrp"><label class="flbl">Thumbnail</label>
-    <div class="thumb-zone" id="tz-e"><span style="font-size:20px">📷</span><span>Tap to upload</span></div>
+    <div class="thumb-zone" id="tz-e"><span style="font-size:20px">📷</span><span>Tap to upload or paste</span></div>
     <input type="file" id="tf-e" accept="image/*" style="display:none">
     <input type="hidden" id="tu-e">
   </div>
@@ -712,6 +719,38 @@ function renderThemePills() {
     pill.appendChild(em);
     pill.addEventListener('click', function(){ applyTheme(k); });
     c.appendChild(pill);
+  });
+  /* update mobile dropdown button emoji */
+  var dropEm = document.getElementById('theme-drop-em');
+  if (dropEm) dropEm.textContent = THEMES[theme] ? THEMES[theme].emoji : '🌸';
+  /* rebuild mobile dropdown menu */
+  var menu = document.getElementById('theme-drop-menu');
+  if (menu) {
+    menu.innerHTML = '';
+    Object.keys(THEMES).forEach(function(k) {
+      var T = THEMES[k];
+      var item = document.createElement('div');
+      item.className = 'theme-drop-item' + (theme===k ? ' active' : '');
+      item.innerHTML = '<span style="font-size:16px">' + T.emoji + '</span><span>' + T.label + '</span>';
+      item.addEventListener('click', function() {
+        applyTheme(k);
+        menu.classList.remove('open');
+      });
+      menu.appendChild(item);
+    });
+  }
+}
+
+/* mobile theme dropdown toggle */
+var _dropBtn = document.getElementById('theme-drop-btn');
+var _dropMenu = document.getElementById('theme-drop-menu');
+if (_dropBtn && _dropMenu) {
+  _dropBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    _dropMenu.classList.toggle('open');
+  });
+  document.addEventListener('click', function() {
+    if (_dropMenu) _dropMenu.classList.remove('open');
   });
 }
 
@@ -1155,6 +1194,21 @@ document.getElementById('tz-f').addEventListener('click',function(){ document.ge
 document.getElementById('tz-e').addEventListener('click',function(){ document.getElementById('tf-e').click(); });
 document.getElementById('tf-f').addEventListener('change',function(){ thumbUpload(this.files[0],'tz-f','tu-f'); });
 document.getElementById('tf-e').addEventListener('change',function(){ thumbUpload(this.files[0],'tz-e','tu-e'); });
+
+/* clipboard paste into thumb zones */
+function handleThumbPaste(e, zoneId, urlId) {
+  var items = (e.clipboardData || e.originalEvent && e.originalEvent.clipboardData || {}).items;
+  if (!items) return;
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].type.indexOf('image') !== -1) {
+      e.preventDefault();
+      thumbUpload(items[i].getAsFile(), zoneId, urlId);
+      break;
+    }
+  }
+}
+document.getElementById('m-log').addEventListener('paste', function(e) { handleThumbPaste(e, 'tz-f', 'tu-f'); });
+document.getElementById('m-edit').addEventListener('paste', function(e) { handleThumbPaste(e, 'tz-e', 'tu-e'); });
 document.querySelectorAll('.sort-btn').forEach(function(btn){
   btn.addEventListener('click',function(){ setSort(this.dataset.sort,this); });
 });
