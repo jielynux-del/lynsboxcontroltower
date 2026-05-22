@@ -232,6 +232,24 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   .mbg.open.mbg-visible .modal{transform:translateY(0);opacity:1}
 }
 
+/* desktop: full-screen focus overlay like settings */
+@media(min-width:769px){
+  .mbg{align-items:flex-end;justify-content:center;background:rgba(30,0,20,.45);backdrop-filter:none}
+  .modal{
+    border-radius:20px 20px 0 0;
+    width:100%;
+    max-width:100%;
+    max-height:94vh;
+    border-bottom:none;
+    transform:translateY(100%);
+    opacity:1;
+    box-shadow:0 -4px 40px rgba(0,0,0,.18);
+  }
+  .mbg.open.mbg-visible .modal{transform:translateY(0);opacity:1}
+  .modal-hdr{border-radius:20px 20px 0 0;padding:16px 32px 14px}
+  .modal-body{padding:24px 32px 48px;max-width:680px;margin:0 auto;width:100%}
+}
+
 .modal-hdr{
   display:flex;align-items:center;justify-content:space-between;
   padding:18px 22px 14px;
@@ -298,21 +316,27 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .cfg-page.open{display:block;transform:translateY(0)}
 .cfg-overlay{display:none;position:fixed;inset:0;background:rgba(30,0,20,.45);z-index:299;opacity:0;transition:opacity .35s ease}
 .cfg-overlay.open{display:block;opacity:1}
-/* on mobile: show only top 5% of bg, rounded top corners */
+/* desktop: show top 6% of background, rounded top corners */
+@media (min-width:769px){
+  .cfg-page{border-radius:20px 20px 0 0;top:6%}
+  .cfg-hdr .cfg-back{display:none}
+  .cfg-close-btn{display:flex !important}
+}
+/* mobile: same treatment */
 @media (max-width:768px){
   .cfg-page{border-radius:20px 20px 0 0;top:5%}
   .cfg-hdr .cfg-back{display:none}
   .cfg-close-btn{display:flex !important}
-  .cfg-title{text-align:left}
 }
 .cfg-close-btn{display:none;background:none;border:none;font-size:18px;color:var(--text-m);cursor:pointer;padding:4px 8px;line-height:1}
 .cfg-close-btn:hover{color:var(--text-1)}
 .cfg-hdr{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--border-h);padding:14px 28px;display:flex;align-items:center;gap:12px}
-.cfg-back{background:none;border:none;cursor:pointer;font-size:13px;font-weight:600;color:var(--text-2);font-family:'Nunito',sans-serif;display:flex;align-items:center;gap:4px;padding:6px 10px;border-radius:var(--pill);transition:background .14s,color .14s}
-.cfg-back:hover{background:var(--accent-light);color:var(--accent-deep)}
-.cfg-title{font-size:19px;font-weight:700;color:var(--text-1);flex:1;text-align:center}
+.cfg-back{display:none}
+.cfg-title{font-size:19px;font-weight:700;color:var(--text-1);flex:1;text-align:left}
 .cfg-savebtn{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:var(--pill);padding:8px 20px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;box-shadow:0 3px 10px rgba(200,60,150,.22)}
 .cfg-savebtn:hover{opacity:.9}
+.cfg-cancelbtn{background:none;border:1px solid var(--cborder);border-radius:var(--pill);padding:8px 16px;font-size:13px;font-weight:600;color:var(--text-2);cursor:pointer;font-family:'Nunito',sans-serif}
+.cfg-cancelbtn:hover{background:var(--accent-light)}
 .cfg-body{padding:28px 28px 48px}
 .cfg-stitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-m);margin-bottom:12px}
 .cfg-card{background:var(--cbg);border-radius:14px;padding:14px 16px;margin-bottom:10px;box-shadow:var(--shsm);border:1px solid var(--cborder)}
@@ -586,9 +610,9 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 <div class="cfg-overlay" id="cfg-overlay"></div>
 <div class="cfg-page" id="cfg-page">
   <div class="cfg-hdr">
-    <button class="cfg-back" id="btn-cfgclose">&#8592; Back</button>
     <div class="cfg-title">⚙️ Settings</div>
     <div style="display:flex;gap:8px;align-items:center">
+      <button class="cfg-cancelbtn" id="btn-cfgclose">Cancel</button>
       <button class="cfg-savebtn" id="btn-cfgsave">Save</button>
       <button class="cfg-close-btn" id="btn-cfgclose-x">✕</button>
     </div>
