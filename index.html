@@ -178,9 +178,12 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .clink:hover{opacity:.85}
 .cactions{display:none}
 .card:hover .cactions{display:none}
-.ckebab-btn{display:flex;position:absolute;top:6px;right:6px;background:var(--cbg);border:1px solid var(--cborder);border-radius:7px;width:24px;height:24px;cursor:pointer;align-items:center;justify-content:center;font-size:13px;color:var(--text-2);box-shadow:var(--shsm);z-index:2}
-.ckebab-menu{display:none;position:fixed;background:var(--cbg);border:1px solid var(--cborder);border-radius:10px;box-shadow:var(--shmd);z-index:500;overflow:hidden;min-width:130px}
+.ckebab-btn{display:flex;position:absolute;top:6px;right:6px;background:var(--cbg);border:1px solid var(--cborder);border-radius:7px;width:24px;height:24px;cursor:pointer;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--text-2);box-shadow:var(--shsm);z-index:2;line-height:1}
+.ckebab-btn:hover{background:var(--accent-light);color:var(--accent-deep)}
+.ckebab-menu{display:none;position:fixed;background:var(--cbg);border:1px solid var(--cborder);border-radius:10px;box-shadow:var(--shmd);z-index:9999;overflow:hidden;min-width:130px}
 .ckebab-menu.open{display:block}
+.ckebab-item{display:flex;align-items:center;gap:7px;padding:9px 13px;font-size:12px;font-weight:600;color:var(--text-1);cursor:pointer;font-family:'Nunito',sans-serif;transition:background .12s}
+.ckebab-item:hover{background:var(--accent-light)}
 
 /* MODALS — slide-up sheet on all screens */
 .mbg{display:none;position:fixed;inset:0;background:rgba(60,10,30,.35);backdrop-filter:blur(4px);z-index:200;align-items:flex-end;justify-content:center}
@@ -244,15 +247,6 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .gpos{color:#186828;font-weight:700}
 .gneg{color:#c41010;font-weight:700}
 
-/* KEBAB — always visible on all cards, all screen sizes */
-.cactions{display:none}
-.ckebab-btn{display:flex;position:absolute;top:6px;right:6px;background:var(--cbg);border:1px solid var(--cborder);border-radius:7px;width:24px;height:24px;cursor:pointer;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--text-2);box-shadow:var(--shsm);z-index:2;line-height:1}
-.ckebab-btn:hover{background:var(--accent-light);color:var(--accent-deep)}
-.ckebab-menu{display:none;position:fixed;background:var(--cbg);border:1px solid var(--cborder);border-radius:10px;box-shadow:var(--shmd);z-index:9999;overflow:hidden;min-width:130px}
-.ckebab-menu.open{display:block}
-.ckebab-item{display:flex;align-items:center;gap:7px;padding:9px 13px;font-size:12px;font-weight:600;color:var(--text-1);cursor:pointer;font-family:'Nunito',sans-serif;transition:background .12s}
-.ckebab-item:hover{background:var(--accent-light)}
-
 /* PASSCODE GATE */
 #gate{position:fixed;inset:0;background:linear-gradient(135deg,#fde4ef 0%,#f8d8f4 50%,#ede0ff 100%);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .4s ease}
 #gate.hide{opacity:0;pointer-events:none}
@@ -270,12 +264,6 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .gate-btn{background:linear-gradient(135deg,#e8789a,#d45c8a);border:none;border-radius:99px;color:#fff;font-size:16px;font-weight:700;padding:10px 36px;cursor:pointer;font-family:'Nunito',sans-serif;box-shadow:0 4px 14px rgba(232,120,154,.35);transition:opacity .15s,transform .1s}
 .gate-btn:active{opacity:.85;transform:scale(.97)}
 
-/* kebab menu for mobile cards */
-.ckebab-btn{display:none;position:absolute;top:6px;right:6px;background:var(--cbg);border:1px solid var(--cborder);border-radius:7px;width:24px;height:24px;cursor:pointer;align-items:center;justify-content:center;font-size:13px;color:var(--text-2);box-shadow:var(--shsm);z-index:2}
-.ckebab-menu{display:none;position:absolute;top:32px;right:6px;background:var(--cbg);border:1px solid var(--cborder);border-radius:10px;box-shadow:var(--shmd);z-index:10;overflow:hidden;min-width:100px}
-.ckebab-menu.open{display:block}
-.ckebab-item{display:flex;align-items:center;gap:7px;padding:9px 13px;font-size:12px;font-weight:600;color:var(--text-1);cursor:pointer;font-family:'Nunito',sans-serif;transition:background .12s}
-.ckebab-item:hover{background:var(--accent-light)}
 
 /* cfg slide-up overlay */
 .cfg-page{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;overflow-y:auto;transform:translateY(100%);transition:transform .35s cubic-bezier(.32,.72,0,1)}
