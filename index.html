@@ -232,13 +232,14 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   .mbg.open.mbg-visible .modal{transform:translateY(0);opacity:1}
 }
 
-/* desktop: full-screen focus overlay like settings */
+/* desktop: full-screen focus overlay identical to settings */
 @media(min-width:769px){
   .mbg{align-items:flex-end;justify-content:center;background:rgba(30,0,20,.45);backdrop-filter:none}
   .modal{
     border-radius:20px 20px 0 0;
     width:100%;
     max-width:100%;
+    height:94vh;
     max-height:94vh;
     border-bottom:none;
     transform:translateY(100%);
@@ -247,7 +248,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   }
   .mbg.open.mbg-visible .modal{transform:translateY(0);opacity:1}
   .modal-hdr{border-radius:20px 20px 0 0;padding:16px 32px 14px}
-  .modal-body{padding:24px 32px 48px;max-width:680px;margin:0 auto;width:100%}
+  .modal-body{padding:24px 32px 48px;max-width:720px;margin:0 auto;width:100%}
 }
 
 .modal-hdr{
@@ -919,15 +920,15 @@ function getThemeAccent() {
   var t = document.documentElement.getAttribute('data-theme') || '';
   if (t === 'diamond') return {line:'#4cb89a', fill:'rgba(76,184,154,.12)', dot:'#4cb89a'};
   if (t === 'raven')   return {line:'#9b7fd4', fill:'rgba(155,127,212,.15)', dot:'#9b7fd4'};
-  if (t === 'paper')   return {line:'#888', fill:'rgba(136,136,136,.1)', dot:'#888'};
+  if (t === 'paper')   return {line:'#888',    fill:'rgba(136,136,136,.1)',  dot:'#888'};
   return {line:'#e8789a', fill:'rgba(232,120,154,.12)', dot:'#e8789a'};
 }
 function drawSpark() {
   var cv = document.getElementById('flw-spark'); if (!cv) return;
-  var dpr = window.devicePixelRatio || 1;
-  var PAD_B = 22;
-  var cssW = cv.parentElement.offsetWidth || 280;
-  var cssH = 72;
+  var dpr   = window.devicePixelRatio || 1;
+  var PAD_L = 4, PAD_R = 28, PAD_T = 6, PAD_B = 22;
+  var cssW  = cv.parentElement.offsetWidth || 280;
+  var cssH  = 72;
   cv.width  = cssW * dpr;
   cv.height = cssH * dpr;
   cv.style.width  = cssW + 'px';
@@ -936,43 +937,72 @@ function drawSpark() {
   ctx.scale(dpr, dpr);
   var w = cssW, h = cssH;
   ctx.clearRect(0, 0, w, h);
-  var ac = getThemeAccent();
+  var ac    = getThemeAccent();
   var data  = followers.map(function(e){ return e.count; });
   var dates = followers.map(function(e){ return e.date || ''; });
   if (data.length < 2) {
-    if (data.length === 1) { ctx.beginPath(); ctx.arc(w/2,(h-PAD_B)/2,4,0,Math.PI*2); ctx.fillStyle=ac.dot; ctx.fill(); }
+    if (data.length === 1) {
+      ctx.beginPath(); ctx.arc(w/2, (h-PAD_B)/2, 4, 0, Math.PI*2);
+      ctx.fillStyle = ac.dot; ctx.fill();
+    }
     return;
   }
-  var chartH = h - PAD_B - 4;
-  var mn = Math.min.apply(null,data), mx = Math.max.apply(null,data), rng = mx-mn||1;
-  var pts = data.map(function(v,i){ return {x:8+(i/(data.length-1))*(w-16), y:chartH-((v-mn)/rng)*(chartH-14)+4}; });
+  var chartW = w - PAD_L - PAD_R;
+  var chartH = h - PAD_T - PAD_B;
+  var mn = Math.min.apply(null, data), mx = Math.max.apply(null, data), rng = mx - mn || 1;
+  /* all data points plotted, spread evenly across full width */
+  var pts = data.map(function(v, i) {
+    return {
+      x: PAD_L + (i / (data.length - 1)) * chartW,
+      y: PAD_T + chartH - ((v - mn) / rng) * chartH
+    };
+  });
+  /* line */
   ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
-  for (var i=1;i<pts.length;i++) { var qx=(pts[i-1].x+pts[i].x)/2, qy=(pts[i-1].y+pts[i].y)/2; ctx.quadraticCurveTo(pts[i-1].x,pts[i-1].y,qx,qy); }
-  ctx.lineTo(pts[pts.length-1].x, pts[pts.length-1].y);
-  ctx.strokeStyle=ac.line; ctx.lineWidth=2; ctx.stroke();
-  ctx.lineTo(pts[pts.length-1].x, chartH); ctx.lineTo(pts[0].x, chartH); ctx.closePath();
-  ctx.fillStyle=ac.fill; ctx.fill();
-  var last=pts[pts.length-1];
-  ctx.beginPath(); ctx.arc(last.x,last.y,4,0,Math.PI*2); ctx.fillStyle=ac.dot; ctx.fill();
-  ctx.beginPath(); ctx.arc(last.x,last.y,2,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
-  /* date labels — max 5 */
-  if (dates.length > 0) {
-    ctx.font = '600 9px Nunito,sans-serif';
-    ctx.fillStyle = 'rgba(160,120,140,.7)';
-    ctx.textAlign = 'center';
-    var maxL = Math.min(5, data.length);
-    var step = data.length <= 1 ? 1 : Math.floor((data.length-1)/(maxL-1));
-    var labelIdx = [];
-    for (var li=0; li<data.length && labelIdx.length<maxL; li+=step||1) labelIdx.push(li);
-    if (labelIdx[labelIdx.length-1] !== data.length-1) labelIdx[labelIdx.length-1] = data.length-1;
-    var months={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
-    labelIdx.forEach(function(idx) {
-      var raw = dates[idx]||'', label=raw;
-      var m = raw.match(/(\d{1,2})\s+(\w{3})/);
-      if (m) label = (m[1].length===1?'0'+m[1]:m[1]) + '/' + (months[m[2]]||m[2]);
-      ctx.fillText(label, pts[idx].x, h-3);
-    });
+  for (var i = 1; i < pts.length; i++) {
+    var qx = (pts[i-1].x + pts[i].x) / 2;
+    var qy = (pts[i-1].y + pts[i].y) / 2;
+    ctx.quadraticCurveTo(pts[i-1].x, pts[i-1].y, qx, qy);
   }
+  ctx.lineTo(pts[pts.length-1].x, pts[pts.length-1].y);
+  ctx.strokeStyle = ac.line; ctx.lineWidth = 2; ctx.stroke();
+  /* fill */
+  ctx.lineTo(pts[pts.length-1].x, PAD_T + chartH);
+  ctx.lineTo(pts[0].x, PAD_T + chartH);
+  ctx.closePath();
+  ctx.fillStyle = ac.fill; ctx.fill();
+  /* dot at last point */
+  var last = pts[pts.length-1];
+  ctx.beginPath(); ctx.arc(last.x, last.y, 4, 0, Math.PI*2); ctx.fillStyle = ac.dot; ctx.fill();
+  ctx.beginPath(); ctx.arc(last.x, last.y, 2, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
+  /* date labels — max 5, always first + last + evenly spaced in between */
+  var months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+  function fmtDate(raw) {
+    var m = (raw||'').match(/(\d{1,2})\s+(\w{3})/);
+    if (!m) return raw||'';
+    return (m[1].length===1?'0'+m[1]:m[1]) + '/' + (months[m[2]]||m[2]);
+  }
+  ctx.font = '600 9px Nunito,sans-serif';
+  ctx.fillStyle = 'rgba(160,120,140,.7)';
+  var labelIdxs = [0];
+  if (data.length > 1) {
+    var maxMid = 3; /* up to 3 middle labels, giving 5 total */
+    var step = (data.length - 1) / (maxMid + 1);
+    for (var li = 1; li <= maxMid; li++) {
+      var idx = Math.round(li * step);
+      if (idx > 0 && idx < data.length - 1) labelIdxs.push(idx);
+    }
+    labelIdxs.push(data.length - 1);
+  }
+  labelIdxs.forEach(function(idx) {
+    var label = fmtDate(dates[idx]);
+    var x = pts[idx].x;
+    /* align: left-align first label, right-align last, centre others */
+    if (idx === 0) ctx.textAlign = 'left';
+    else if (idx === data.length - 1) ctx.textAlign = 'right';
+    else ctx.textAlign = 'center';
+    ctx.fillText(label, x, h - 3);
+  });
 }
 
 /* ── STATS ── */
