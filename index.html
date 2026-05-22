@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0057)file:///Users/lyn/Downloads/lynsbox-control-centre_3.html -->
+
 <html lang="en" data-theme=""><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -323,7 +323,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 
 /* hide mobile sort on desktop */
 .sort-mobile-wrap{display:none}
-
+</style>
 </head>
 <body>
 <!-- PASSCODE GATE -->
@@ -331,7 +331,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   <div class="gate-box">
     <div class="gate-emoji" id="gate-emoji">👸🏻</div>
     <div class="gate-title" id="gate-title">Hey Lyn! Ready to create?</div>
-    <input class="gate-input" id="gate-input" type="password" placeholder="enter passcode" autocomplete="off" autocorrect="off" spellcheck="false">
+    <input class="gate-input" id="gate-input" type="password" inputmode="numeric" placeholder="enter passcode" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
     <div class="gate-hint" id="gate-hint">&nbsp;</div>
   </div>
 </div>
@@ -486,7 +486,8 @@ const _app = initializeApp({
 const _db      = getFirestore(_app);
 const _dataDoc = doc(_db, 'lcc', 'main');
 
-document.addEventListener('DOMContentLoaded', function() {
+/* module scripts are deferred — DOM is always ready by the time this runs */
+function init() {
 
 /* ── PASSCODE GATE ── */
 (function() {
@@ -555,8 +556,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  inputEl.addEventListener('keyup', function(e) {
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      e.preventDefault();
+      attempt();
+    }
+  });
+
   inputEl.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') { e.preventDefault(); attempt(); }
+    if (e.key === 'Enter' || e.keyCode === 13) {
+      e.preventDefault();
+    }
   });
 })();
 
@@ -1174,7 +1184,13 @@ window.addEventListener('resize',drawSpark);
 applyTheme(theme);          /* apply saved theme immediately so no flash */
 loadFromFirestore();        /* load data, then render, then start listener */
 
-}); /* end DOMContentLoaded */
+} /* end init */
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
 </script>
 
 
