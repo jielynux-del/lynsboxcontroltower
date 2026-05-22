@@ -125,7 +125,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .kanban{display:flex;gap:14px;padding:0 28px 48px;overflow-x:auto;flex:1;align-items:flex-start}
 .kanban::-webkit-scrollbar{height:6px}
 .kanban::-webkit-scrollbar-thumb{background:rgba(200,120,160,.22);border-radius:99px}
-.pcol{flex:0 0 224px;min-width:224px}
+.pcol{flex:1 1 0;min-width:180px}
 .phdr{border-radius:14px;padding:12px 14px 11px;margin-bottom:8px;position:relative;overflow:visible}
 .p1 .phdr{background:var(--p1-bg)} .p2 .phdr{background:var(--p2-bg)} .p3 .phdr{background:var(--p3-bg)} .p4 .phdr{background:var(--p4-bg)} .p5 .phdr{background:var(--p5-bg)}
 .pname{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em}
@@ -248,8 +248,82 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .cfg-fld label{font-size:10px;color:var(--text-m);font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px}
 .cfg-inp,.cfg-ta{width:100%;border:1px solid var(--iborder);border-radius:10px;padding:8px 12px;font-size:13px;font-family:'Nunito',sans-serif;font-weight:500;color:var(--text-1);background:var(--ibg);outline:none;transition:border-color .15s}
 .cfg-inp:focus,.cfg-ta:focus{border-color:var(--accent)}
-.cfg-ta{resize:vertical;min-height:68px;line-height:1.5}
-</style>
+/* ── MOBILE ── */
+@media (max-width: 768px) {
+
+  /* NAV BAR */
+  .hdr{
+    padding:18px 16px;
+    flex-wrap:nowrap;
+    justify-content:space-between;
+    position:sticky;
+    top:0;
+    z-index:100;
+    transition:padding .25s ease, transform .25s ease;
+    will-change:transform;
+  }
+  .hdr.hdr-compact{padding:10px 16px}
+  .hdr.hdr-hidden{transform:translateY(-100%)}
+  .hdr-title{
+    font-size:15px;
+    flex:1;
+    text-align:center;
+    transition:max-height .25s ease, opacity .25s ease, margin .25s ease;
+    max-height:40px;
+    overflow:hidden;
+    opacity:1;
+  }
+  .hdr.hdr-compact .hdr-title{max-height:0;opacity:0;margin:0;pointer-events:none}
+  .hdr-right{
+    flex-wrap:nowrap;
+    gap:6px;
+    justify-content:flex-end;
+  }
+  .hdr-divider{display:none}
+  /* theme pills: smaller on mobile */
+  .theme-pill{padding:4px 7px}
+  .theme-pill span.em{font-size:12px}
+
+  /* STATS */
+  .stats{padding:16px 16px 14px;gap:10px}
+  .smtiles{min-width:100px}
+
+  /* DIVIDER + TOOLBAR */
+  .divrow{padding:0 16px 14px}
+  .toolbar{padding:0 16px 14px;gap:4px}
+
+  /* SORT — dropdown on mobile */
+  .sort-btn{display:none}
+  .tbar-lbl{display:none}
+  .sort-mobile-wrap{display:flex;align-items:center;gap:8px;width:100%}
+  .sort-mobile-lbl{font-size:10px;color:var(--text-m);font-weight:600;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+  .sort-mobile-sel{
+    flex:1;
+    border:1px solid var(--sborder);
+    border-radius:var(--pill);
+    padding:6px 32px 6px 14px;
+    font-size:12px;
+    font-weight:600;
+    color:var(--text-2);
+    font-family:'Nunito',sans-serif;
+    background:var(--cbg);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c8a0b8' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 12px center;
+    box-shadow:var(--shsm);
+    outline:none;
+    appearance:none;
+    -webkit-appearance:none;
+  }
+
+  /* KANBAN — horizontal scroll on mobile, fixed card width */
+  .kanban{padding:0 16px 40px;gap:10px;overflow-x:auto}
+  .pcol{flex:0 0 200px;min-width:200px}
+}
+
+/* hide mobile sort on desktop */
+.sort-mobile-wrap{display:none}
+
 </head>
 <body>
 <!-- PASSCODE GATE -->
@@ -297,6 +371,17 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   <button class="sort-btn" data-sort="saves">Saves</button>
   <button class="sort-btn" data-sort="shares">Shares</button>
   <button class="sort-btn" data-sort="followers">Followers Gained</button>
+  <!-- mobile dropdown -->
+  <div class="sort-mobile-wrap">
+    <span class="sort-mobile-lbl">Sort by</span>
+    <select class="sort-mobile-sel" id="sort-mobile-sel">
+      <option value="manual">Manual rank</option>
+      <option value="views">Views</option>
+      <option value="saves">Saves</option>
+      <option value="shares">Shares</option>
+      <option value="followers">Followers Gained</option>
+    </select>
+  </div>
 </div>
 
 <div class="kanban" id="kanban">
@@ -1041,6 +1126,48 @@ document.querySelectorAll('.sort-btn').forEach(function(btn){
 document.getElementById('m-log').addEventListener('click',function(e){ if(e.target===this)closeLog(); });
 document.getElementById('m-edit').addEventListener('click',function(e){ if(e.target===this)closeEdit(); });
 document.getElementById('m-flw').addEventListener('click',function(e){ if(e.target===this)closeFlw(); });
+/* ── MOBILE SORT DROPDOWN ── */
+var mobileSortSel = document.getElementById('sort-mobile-sel');
+if(mobileSortSel){
+  mobileSortSel.addEventListener('change', function(){
+    var s = this.value;
+    sort = s;
+    /* keep desktop buttons in sync */
+    document.querySelectorAll('.sort-btn').forEach(function(b){
+      b.classList.toggle('active', b.dataset.sort === s);
+    });
+    renderKanban();
+  });
+}
+
+/* ── SCROLL-HIDE NAV (mobile) ── */
+(function(){
+  var hdr = document.querySelector('.hdr');
+  var lastY = 0;
+  var ticking = false;
+  window.addEventListener('scroll', function(){
+    if(ticking) return;
+    ticking = true;
+    requestAnimationFrame(function(){
+      var y = window.scrollY;
+      if(window.innerWidth > 768){ hdr.classList.remove('hdr-compact','hdr-hidden'); ticking=false; return; }
+      if(y < 10){
+        hdr.classList.remove('hdr-compact','hdr-hidden');
+      } else if(y > lastY){
+        /* scrolling down — compact then hide */
+        hdr.classList.add('hdr-compact');
+        if(y - lastY > 4) hdr.classList.add('hdr-hidden');
+      } else {
+        /* scrolling up — show compact */
+        hdr.classList.remove('hdr-hidden');
+        hdr.classList.add('hdr-compact');
+      }
+      lastY = y;
+      ticking = false;
+    });
+  }, {passive:true});
+})();
+
 window.addEventListener('resize',drawSpark);
 
 /* ── INIT ── */
