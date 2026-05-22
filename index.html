@@ -176,19 +176,55 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .bpin{background:var(--accent-light);color:var(--accent-deep);font-size:10px;padding:1px 5px}
 .clink{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--accent-deep);text-decoration:none;padding:2px 7px;border-radius:var(--pill);background:var(--accent-light);width:fit-content}
 .clink:hover{opacity:.85}
-.cactions{position:absolute;top:6px;right:6px;display:flex;gap:3px;opacity:0;transition:opacity .15s}
-.card:hover .cactions{opacity:1}
-.cact-btn{background:var(--cbg);border:1px solid var(--cborder);border-radius:7px;width:22px;height:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-2);box-shadow:var(--shsm)}
-.cact-btn:hover{background:var(--accent-light);color:var(--accent-deep)}
+.cactions{display:none}
+.card:hover .cactions{display:none}
+.ckebab-btn{display:flex;position:absolute;top:6px;right:6px;background:var(--cbg);border:1px solid var(--cborder);border-radius:7px;width:24px;height:24px;cursor:pointer;align-items:center;justify-content:center;font-size:13px;color:var(--text-2);box-shadow:var(--shsm);z-index:2}
+.ckebab-menu{display:none;position:fixed;background:var(--cbg);border:1px solid var(--cborder);border-radius:10px;box-shadow:var(--shmd);z-index:500;overflow:hidden;min-width:130px}
+.ckebab-menu.open{display:block}
 
-/* MODALS */
-.mbg{display:none;position:fixed;inset:0;background:rgba(60,10,30,.2);backdrop-filter:blur(6px);z-index:200;align-items:center;justify-content:center}
+/* MODALS — slide-up sheet on all screens */
+.mbg{display:none;position:fixed;inset:0;background:rgba(60,10,30,.35);backdrop-filter:blur(4px);z-index:200;align-items:flex-end;justify-content:center}
 .mbg.open{display:flex}
-.modal{background:var(--cbg);border-radius:22px;padding:26px;width:420px;max-width:95vw;max-height:75vh;overflow-y:auto;box-shadow:0 20px 50px rgba(0,0,0,.18);border:1px solid var(--cborder)}
-.modal::-webkit-scrollbar{width:4px}
-.modal::-webkit-scrollbar-track{background:transparent}
-.modal::-webkit-scrollbar-thumb{background:rgba(0,0,0,.18);border-radius:99px}
-.modal::-webkit-scrollbar-button{display:none}
+.modal{
+  background:var(--cbg);
+  border-radius:22px 22px 0 0;
+  width:100%;
+  max-width:560px;
+  max-height:90vh;
+  display:flex;
+  flex-direction:column;
+  box-shadow:0 -8px 40px rgba(0,0,0,.18);
+  border:1px solid var(--cborder);
+  border-bottom:none;
+  transform:translateY(100%);
+  transition:transform .32s cubic-bezier(.32,.72,0,1);
+}
+.mbg.open .modal{transform:translateY(0)}
+.modal-hdr{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:18px 22px 14px;
+  border-bottom:1px solid var(--cborder);
+  position:sticky;
+  top:0;
+  background:var(--cbg);
+  border-radius:22px 22px 0 0;
+  z-index:2;
+  flex-shrink:0;
+}
+.modal-hdr .mtitle{font-size:17px;font-weight:700;color:var(--text-1);margin:0}
+.modal-hdr-actions{display:flex;gap:8px;align-items:center}
+.modal-body{padding:18px 22px 32px;overflow-y:auto;flex:1}
+.modal-body::-webkit-scrollbar{width:4px}
+.modal-body::-webkit-scrollbar-track{background:transparent}
+.modal-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:99px}
+/* keep old .modal padding rules from breaking follower modal */
+.modal.modal-legacy{border-radius:22px;max-height:75vh;transform:none;display:block;overflow-y:auto;padding:26px;width:420px;max-width:95vw}
+.modal.modal-legacy::-webkit-scrollbar{width:4px}
+.modal.modal-legacy::-webkit-scrollbar-track{background:transparent}
+.modal.modal-legacy::-webkit-scrollbar-thumb{background:rgba(0,0,0,.18);border-radius:99px}
+.mbg-legacy{align-items:center}
 .mtitle{font-size:17px;font-weight:700;color:var(--text-1);margin-bottom:18px}
 .fgrp{margin-bottom:12px}
 .flbl{font-size:10px;color:var(--text-m);font-weight:700;text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:5px}
@@ -251,6 +287,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   .cfg-page{border-radius:20px 20px 0 0;top:5%}
   .cfg-hdr .cfg-back{display:none}
   .cfg-close-btn{display:flex !important}
+  .cfg-title{text-align:left}
 }
 .cfg-close-btn{display:none;background:none;border:none;font-size:18px;color:var(--text-m);cursor:pointer;padding:4px 8px;line-height:1}
 .cfg-close-btn:hover{color:var(--text-1)}
@@ -360,10 +397,6 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   .kanban{padding:0 14px 48px;gap:10px}
   .pcol{flex:0 0 210px;min-width:210px}
 
-  /* CARDS — show kebab, hide hover actions */
-  .cactions{display:none !important}
-  .ckebab-btn{display:flex}
-
   /* STATS — posts and collabs side by side, full width */
   .smtiles{display:flex;flex-direction:row;gap:10px;width:100%}
   .smtiles .stile{flex:1;min-width:0}
@@ -451,8 +484,16 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 </div>
 
 <!-- LOG MODAL -->
-<div class="mbg" id="m-log"><div class="modal">
-  <div class="mtitle">Log Post</div>
+<div class="mbg" id="m-log">
+<div class="modal">
+  <div class="modal-hdr">
+    <div class="mtitle">Log Post</div>
+    <div class="modal-hdr-actions">
+      <button class="btn-cancel" id="btn-fcancel">Cancel</button>
+      <button class="btn-save" id="btn-fsave">Save Post</button>
+    </div>
+  </div>
+  <div class="modal-body">
   <div class="fgrp"><label class="flbl">Thumbnail</label>
     <div class="thumb-zone" id="tz-f"><span style="font-size:20px">📷</span><span>Tap to upload or paste</span></div>
     <input type="file" id="tf-f" accept="image/*" style="display:none">
@@ -462,21 +503,27 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   <div class="fgrp"><label class="flbl">Instagram URL</label><input class="finp" id="fi-igurl" placeholder="https://www.instagram.com/p/..."><div class="fhint">Optional — tap through from the card</div></div>
   <div class="frow">
     <div class="fgrp"><label class="flbl">Pillar</label><select class="fsel" id="fi-pillar"><option value="1">P1 · Knowledge</option><option value="2">P2 · Life</option><option value="3">P3 · Gentle authority</option><option value="4">P4 · Soft gratitude</option><option value="5">P5 · Practical finds</option></select></div>
-    <div class="fgrp"><label class="flbl">Format</label><select class="fsel" id="fi-format">
-      <option>Reel</option><option>Carousel</option><option>Static</option>
-    </select></div>
+    <div class="fgrp"><label class="flbl">Format</label><select class="fsel" id="fi-format"><option>Reel</option><option>Carousel</option><option>Static</option></select></div>
   </div>
   <div class="cbrow">
     <label class="cblbl"><input type="checkbox" id="fi-collab"> Collab / Gifted</label>
     <label class="cblbl"><input type="checkbox" id="fi-paid"> Paid</label>
     <label class="cblbl"><input type="checkbox" id="fi-series"> Series</label>
   </div>
-  <div class="mactions"><button class="btn-cancel" id="btn-fcancel">Cancel</button><button class="btn-save" id="btn-fsave">Save Post</button></div>
+  </div>
 </div></div>
 
 <!-- EDIT MODAL -->
-<div class="mbg" id="m-edit"><div class="modal">
-  <div class="mtitle">Edit Post</div>
+<div class="mbg" id="m-edit">
+<div class="modal">
+  <div class="modal-hdr">
+    <div class="mtitle">Edit Post</div>
+    <div class="modal-hdr-actions">
+      <button class="btn-cancel" id="btn-ecancel">Cancel</button>
+      <button class="btn-save" id="btn-esave">Save Changes</button>
+    </div>
+  </div>
+  <div class="modal-body">
   <div class="fgrp"><label class="flbl">Thumbnail</label>
     <div class="thumb-zone" id="tz-e"><span style="font-size:20px">📷</span><span>Tap to upload or paste</span></div>
     <input type="file" id="tf-e" accept="image/*" style="display:none">
@@ -486,16 +533,14 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   <div class="fgrp"><label class="flbl">Instagram URL</label><input class="finp" id="ei-igurl" placeholder="https://www.instagram.com/p/..."><div class="fhint">Optional — tap through from the card</div></div>
   <div class="frow">
     <div class="fgrp"><label class="flbl">Pillar</label><select class="fsel" id="ei-pillar"><option value="1">P1 · Knowledge</option><option value="2">P2 · Life</option><option value="3">P3 · Gentle authority</option><option value="4">P4 · Soft gratitude</option><option value="5">P5 · Practical finds</option></select></div>
-    <div class="fgrp"><label class="flbl">Format</label><select class="fsel" id="ei-format">
-      <option>Reel</option><option>Carousel</option><option>Static</option>
-    </select></div>
+    <div class="fgrp"><label class="flbl">Format</label><select class="fsel" id="ei-format"><option>Reel</option><option>Carousel</option><option>Static</option></select></div>
   </div>
   <div class="cbrow">
     <label class="cblbl"><input type="checkbox" id="ei-collab"> Collab / Gifted</label>
     <label class="cblbl"><input type="checkbox" id="ei-paid"> Paid</label>
     <label class="cblbl"><input type="checkbox" id="ei-series"> Series</label>
   </div>
-  <div class="mactions"><button class="btn-cancel" id="btn-ecancel">Cancel</button><button class="btn-save" id="btn-esave">Save Changes</button></div>
+  </div>
 </div></div>
 
 <!-- FOLLOWER MODAL -->
@@ -831,52 +876,54 @@ function getThemeAccent() {
   return {line:'#e8789a', fill:'rgba(232,120,154,.12)', dot:'#e8789a'};
 }
 function drawSpark() {
-  var cv=document.getElementById('flw-spark'); if(!cv)return;
-  var PAD_B=22; /* bottom padding for labels */
-  cv.width=cv.parentElement.offsetWidth||280; cv.height=72;
-  var ctx=cv.getContext('2d'), w=cv.width, h=cv.height;
-  ctx.clearRect(0,0,w,h);
+  var cv = document.getElementById('flw-spark'); if (!cv) return;
+  var dpr = window.devicePixelRatio || 1;
+  var PAD_B = 22;
+  var cssW = cv.parentElement.offsetWidth || 280;
+  var cssH = 72;
+  cv.width  = cssW * dpr;
+  cv.height = cssH * dpr;
+  cv.style.width  = cssW + 'px';
+  cv.style.height = cssH + 'px';
+  var ctx = cv.getContext('2d');
+  ctx.scale(dpr, dpr);
+  var w = cssW, h = cssH;
+  ctx.clearRect(0, 0, w, h);
   var ac = getThemeAccent();
-  var data=followers.map(function(e){return e.count;});
-  var dates=followers.map(function(e){return e.date||'';});
-  if(data.length<2){
-    if(data.length===1){ctx.beginPath();ctx.arc(w/2,(h-PAD_B)/2,4,0,Math.PI*2);ctx.fillStyle=ac.dot;ctx.fill();}
+  var data  = followers.map(function(e){ return e.count; });
+  var dates = followers.map(function(e){ return e.date || ''; });
+  if (data.length < 2) {
+    if (data.length === 1) { ctx.beginPath(); ctx.arc(w/2,(h-PAD_B)/2,4,0,Math.PI*2); ctx.fillStyle=ac.dot; ctx.fill(); }
     return;
   }
-  var chartH=h-PAD_B-4;
-  var mn=Math.min.apply(null,data), mx=Math.max.apply(null,data), rng=mx-mn||1;
-  var pts=data.map(function(v,i){return{x:6+(i/(data.length-1))*(w-12),y:chartH-((v-mn)/rng)*(chartH-14)+4};});
-  /* fill */
-  ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y);
-  for(var i=1;i<pts.length;i++){var mx2=(pts[i-1].x+pts[i].x)/2,my=(pts[i-1].y+pts[i].y)/2;ctx.quadraticCurveTo(pts[i-1].x,pts[i-1].y,mx2,my);}
-  ctx.lineTo(pts[pts.length-1].x,pts[pts.length-1].y);
-  ctx.strokeStyle=ac.line;ctx.lineWidth=2;ctx.stroke();
-  ctx.lineTo(pts[pts.length-1].x,chartH);ctx.lineTo(pts[0].x,chartH);ctx.closePath();
-  ctx.fillStyle=ac.fill;ctx.fill();
-  /* dot at last point */
+  var chartH = h - PAD_B - 4;
+  var mn = Math.min.apply(null,data), mx = Math.max.apply(null,data), rng = mx-mn||1;
+  var pts = data.map(function(v,i){ return {x:8+(i/(data.length-1))*(w-16), y:chartH-((v-mn)/rng)*(chartH-14)+4}; });
+  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+  for (var i=1;i<pts.length;i++) { var qx=(pts[i-1].x+pts[i].x)/2, qy=(pts[i-1].y+pts[i].y)/2; ctx.quadraticCurveTo(pts[i-1].x,pts[i-1].y,qx,qy); }
+  ctx.lineTo(pts[pts.length-1].x, pts[pts.length-1].y);
+  ctx.strokeStyle=ac.line; ctx.lineWidth=2; ctx.stroke();
+  ctx.lineTo(pts[pts.length-1].x, chartH); ctx.lineTo(pts[0].x, chartH); ctx.closePath();
+  ctx.fillStyle=ac.fill; ctx.fill();
   var last=pts[pts.length-1];
-  ctx.beginPath();ctx.arc(last.x,last.y,4,0,Math.PI*2);ctx.fillStyle=ac.dot;ctx.fill();
-  ctx.beginPath();ctx.arc(last.x,last.y,2,0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();
-  /* date labels — max 5, evenly spaced */
-  if(dates.length>0){
-    ctx.font='600 9px Nunito,sans-serif';
-    ctx.fillStyle='rgba(160,120,140,.7)';
-    ctx.textAlign='center';
-    var maxLabels=Math.min(5,data.length);
-    var step=Math.floor((data.length-1)/(maxLabels-1))||1;
-    var labelIdx=[];
-    for(var li=0;li<data.length;li+=step){ labelIdx.push(li); if(labelIdx.length>=maxLabels)break; }
-    if(labelIdx[labelIdx.length-1]!==data.length-1) labelIdx[labelIdx.length-1]=data.length-1;
-    labelIdx.forEach(function(idx){
-      var rawDate=dates[idx]||'';
-      /* parse DD MMM YYYY or any format → DD/MM */
-      var label=rawDate;
-      var m=rawDate.match(/(\d{1,2})\s+(\w{3})/);
-      if(m){
-        var months={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
-        label=(m[1].length===1?'0'+m[1]:m[1])+'/'+(months[m[2]]||m[2]);
-      }
-      ctx.fillText(label, pts[idx].x, h-2);
+  ctx.beginPath(); ctx.arc(last.x,last.y,4,0,Math.PI*2); ctx.fillStyle=ac.dot; ctx.fill();
+  ctx.beginPath(); ctx.arc(last.x,last.y,2,0,Math.PI*2); ctx.fillStyle='#fff'; ctx.fill();
+  /* date labels — max 5 */
+  if (dates.length > 0) {
+    ctx.font = '600 9px Nunito,sans-serif';
+    ctx.fillStyle = 'rgba(160,120,140,.7)';
+    ctx.textAlign = 'center';
+    var maxL = Math.min(5, data.length);
+    var step = data.length <= 1 ? 1 : Math.floor((data.length-1)/(maxL-1));
+    var labelIdx = [];
+    for (var li=0; li<data.length && labelIdx.length<maxL; li+=step||1) labelIdx.push(li);
+    if (labelIdx[labelIdx.length-1] !== data.length-1) labelIdx[labelIdx.length-1] = data.length-1;
+    var months={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+    labelIdx.forEach(function(idx) {
+      var raw = dates[idx]||'', label=raw;
+      var m = raw.match(/(\d{1,2})\s+(\w{3})/);
+      if (m) label = (m[1].length===1?'0'+m[1]:m[1]) + '/' + (months[m[2]]||m[2]);
+      ctx.fillText(label, pts[idx].x, h-3);
     });
   }
 }
@@ -992,6 +1039,13 @@ function makeCard(post) {
   kbtn.addEventListener('click',function(e){
     e.stopPropagation();
     document.querySelectorAll('.ckebab-menu.open').forEach(function(m){if(m!==kmenu)m.classList.remove('open');});
+    if(!kmenu.classList.contains('open')){
+      /* position menu relative to button using fixed coords */
+      var r=kbtn.getBoundingClientRect();
+      kmenu.style.top=(r.bottom+4)+'px';
+      kmenu.style.right=(window.innerWidth-r.right)+'px';
+      kmenu.style.left='auto';
+    }
     kmenu.classList.toggle('open');
   });
   document.addEventListener('click',function(){ kmenu.classList.remove('open'); },{once:false});
@@ -1048,7 +1102,7 @@ function makeCard(post) {
   kmenu.appendChild(kdel);
 
   card.appendChild(kbtn);
-  card.appendChild(kmenu);
+  document.body.appendChild(kmenu);
   card.appendChild(act);
 
   /* drag events */
