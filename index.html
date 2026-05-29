@@ -101,7 +101,7 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .flw-date{font-size:11px;color:var(--text-m);font-weight:500;margin-top:3px}
 .flw-hint{font-size:11px;color:var(--accent);font-weight:600;margin-top:2px}
 .flw-graph{flex:1;margin-top:10px;min-height:50px}
-.flw-graph canvas{display:block;width:100%;height:54px}
+.flw-graph canvas{display:block;width:100%;height:72px}
 .smtiles{display:flex;flex-direction:column;gap:12px;min-width:150px}
 .stile{background:var(--cbg);border-radius:16px;padding:13px 18px;box-shadow:var(--shsk);position:relative;overflow:hidden;flex:1;display:flex;flex-direction:column;justify-content:center;cursor:pointer;transition:box-shadow .15s,transform .12s}
 .stile::after{content:'';position:absolute;top:0;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent)}
@@ -954,92 +954,106 @@ function updatePillarSelects() {
 }
 
 /* ── SPARKLINE ── */
+var THEME_ACCENTS = {
+  '':        {line:'#e8789a', fill:'rgba(232,120,154,.12)', dot:'#e8789a'},
+  'diamond': {line:'#4cb89a', fill:'rgba(76,184,154,.12)',  dot:'#4cb89a'},
+  'raven':   {line:'#9b7fd4', fill:'rgba(155,127,212,.15)', dot:'#9b7fd4'},
+  'paper':   {line:'#888',    fill:'rgba(136,136,136,.1)',  dot:'#888'}
+};
 function getThemeAccent() {
   var t = document.documentElement.getAttribute('data-theme') || '';
-  if (t === 'diamond') return {line:'#4cb89a', fill:'rgba(76,184,154,.12)', dot:'#4cb89a'};
-  if (t === 'raven')   return {line:'#9b7fd4', fill:'rgba(155,127,212,.15)', dot:'#9b7fd4'};
-  if (t === 'paper')   return {line:'#888',    fill:'rgba(136,136,136,.1)',  dot:'#888'};
-  return {line:'#e8789a', fill:'rgba(232,120,154,.12)', dot:'#e8789a'};
+  return THEME_ACCENTS[t] || THEME_ACCENTS[''];
 }
 function drawSpark() {
-  var cv = document.getElementById('flw-spark'); if (!cv) return;
-  var dpr   = window.devicePixelRatio || 1;
-  var PAD_L = 4, PAD_R = 28, PAD_T = 6, PAD_B = 22;
-  var cssW  = cv.parentElement.offsetWidth || 280;
-  var cssH  = 72;
-  cv.width  = cssW * dpr;
-  cv.height = cssH * dpr;
-  cv.style.width  = cssW + 'px';
-  cv.style.height = cssH + 'px';
-  var ctx = cv.getContext('2d');
-  ctx.scale(dpr, dpr);
-  var w = cssW, h = cssH;
-  ctx.clearRect(0, 0, w, h);
-  var ac    = getThemeAccent();
-  var data  = followers.map(function(e){ return e.count; });
-  var dates = followers.map(function(e){ return e.date || ''; });
-  if (data.length < 2) {
-    if (data.length === 1) {
-      ctx.beginPath(); ctx.arc(w/2, (h-PAD_B)/2, 4, 0, Math.PI*2);
-      ctx.fillStyle = ac.dot; ctx.fill();
+  /* defer one frame so layout is complete and canvas has width */
+  requestAnimationFrame(function() {
+    var cv = document.getElementById('flw-spark'); if (!cv) return;
+    var dpr   = window.devicePixelRatio || 1;
+    var PAD_L = 4, PAD_R = 28, PAD_T = 6, PAD_B = 22;
+    var cssW  = cv.parentElement ? (cv.parentElement.offsetWidth || 0) : 0;
+    if (cssW < 10) return; /* not laid out yet */
+    var cssH  = 72;
+    cv.width  = cssW * dpr;
+    cv.height = cssH * dpr;
+    cv.style.width  = cssW + 'px';
+    cv.style.height = cssH + 'px';
+    var ctx = cv.getContext('2d');
+    ctx.setTransform(1,0,0,1,0,0); /* reset any previous transform */
+    ctx.scale(dpr, dpr);
+    var w = cssW, h = cssH;
+    ctx.clearRect(0, 0, w, h);
+    var ac = getThemeAccent();
+    /* deduplicate by date — keep only the latest entry per date */
+    var seen = {}, deduped = [];
+    followers.forEach(function(e) { seen[e.date] = e; });
+    var sortedDates = Object.keys(seen).sort(function(a,b){ return (seen[a].ts||0)-(seen[b].ts||0); });
+    sortedDates.forEach(function(d){ deduped.push(seen[d]); });
+    var data  = deduped.map(function(e){ return e.count; });
+    var dates = deduped.map(function(e){ return e.date || ''; });
+    if (data.length < 2) {
+      if (data.length === 1) {
+        ctx.beginPath(); ctx.arc(w/2, (h-PAD_B)/2, 4, 0, Math.PI*2);
+        ctx.fillStyle = ac.dot; ctx.fill();
+      }
+      return;
     }
-    return;
-  }
-  var chartW = w - PAD_L - PAD_R;
-  var chartH = h - PAD_T - PAD_B;
-  var mn = Math.min.apply(null, data), mx = Math.max.apply(null, data), rng = mx - mn || 1;
-  /* use actual timestamps for x so gaps between dates are proportional */
-  var timestamps = followers.map(function(e){ return e.ts || 0; });
-  var tMin = Math.min.apply(null, timestamps), tMax = Math.max.apply(null, timestamps), tRng = tMax - tMin || 1;
-  var pts = data.map(function(v, i) {
-    return {
-      x: PAD_L + ((timestamps[i] - tMin) / tRng) * chartW,
-      y: PAD_T + chartH - ((v - mn) / rng) * chartH
-    };
-  });
-  /* fill — separate path so it doesn't interfere with stroke */
-  ctx.beginPath(); ctx.moveTo(pts[0].x, PAD_T + chartH);
-  ctx.lineTo(pts[0].x, pts[0].y);
-  for (var i = 1; i < pts.length; i++) { ctx.lineTo(pts[i].x, pts[i].y); }
-  ctx.lineTo(pts[pts.length-1].x, PAD_T + chartH);
-  ctx.closePath();
-  ctx.fillStyle = ac.fill; ctx.fill();
-
-  /* line — drawn on top of fill */
-  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
-  for (var i = 1; i < pts.length; i++) { ctx.lineTo(pts[i].x, pts[i].y); }
-  ctx.strokeStyle = ac.line; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
-  /* dot at last point */
-  var last = pts[pts.length-1];
-  ctx.beginPath(); ctx.arc(last.x, last.y, 4, 0, Math.PI*2); ctx.fillStyle = ac.dot; ctx.fill();
-  ctx.beginPath(); ctx.arc(last.x, last.y, 2, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
-  /* date labels — max 5, always first + last + evenly spaced in between */
-  var months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
-  function fmtDate(raw) {
-    var m = (raw||'').match(/(\d{1,2})\s+(\w{3})/);
-    if (!m) return raw||'';
-    return (m[1].length===1?'0'+m[1]:m[1]) + '/' + (months[m[2]]||m[2]);
-  }
-  ctx.font = '600 9px Nunito,sans-serif';
-  ctx.fillStyle = 'rgba(160,120,140,.7)';
-  var labelIdxs = [0];
-  if (data.length > 1) {
-    var maxMid = 3; /* up to 3 middle labels, giving 5 total */
-    var step = (data.length - 1) / (maxMid + 1);
-    for (var li = 1; li <= maxMid; li++) {
-      var idx = Math.round(li * step);
-      if (idx > 0 && idx < data.length - 1) labelIdxs.push(idx);
+    var chartW = w - PAD_L - PAD_R;
+    var chartH = h - PAD_T - PAD_B;
+    var mn = Math.min.apply(null, data), mx = Math.max.apply(null, data);
+    /* add 5% padding below min so tiny changes don't look flat */
+    var rng = mx - mn || 1;
+    mn = mn - rng * 0.1;
+    rng = mx - mn;
+    var n = data.length;
+    var pts = data.map(function(v, i) {
+      return {
+        x: PAD_L + (n === 1 ? chartW / 2 : (i / (n - 1)) * chartW),
+        y: PAD_T + chartH - ((v - mn) / rng) * chartH
+      };
+    });
+    /* fill */
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, PAD_T + chartH);
+    ctx.lineTo(pts[0].x, pts[0].y);
+    for (var i = 1; i < pts.length; i++) { ctx.lineTo(pts[i].x, pts[i].y); }
+    ctx.lineTo(pts[pts.length-1].x, PAD_T + chartH);
+    ctx.closePath();
+    ctx.fillStyle = ac.fill; ctx.fill();
+    /* line */
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (var i = 1; i < pts.length; i++) { ctx.lineTo(pts[i].x, pts[i].y); }
+    ctx.strokeStyle = ac.line; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
+    /* dot at last point */
+    var last = pts[pts.length-1];
+    ctx.beginPath(); ctx.arc(last.x, last.y, 4, 0, Math.PI*2); ctx.fillStyle = ac.dot; ctx.fill();
+    ctx.beginPath(); ctx.arc(last.x, last.y, 2, 0, Math.PI*2); ctx.fillStyle = '#fff'; ctx.fill();
+    /* date labels — first + last + up to 3 evenly spaced middle labels */
+    var months = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'};
+    function fmtDate(raw) {
+      var m = (raw||'').match(/(\d{1,2})\s+(\w{3})/);
+      if (!m) return raw||'';
+      return (m[1].length===1?'0'+m[1]:m[1]) + '/' + (months[m[2]]||m[2]);
     }
-    labelIdxs.push(data.length - 1);
-  }
-  labelIdxs.forEach(function(idx) {
-    var label = fmtDate(dates[idx]);
-    var x = pts[idx].x;
-    /* align: left-align first label, right-align last, centre others */
-    if (idx === 0) ctx.textAlign = 'left';
-    else if (idx === data.length - 1) ctx.textAlign = 'right';
-    else ctx.textAlign = 'center';
-    ctx.fillText(label, x, h - 3);
+    ctx.font = '600 9px Nunito,sans-serif';
+    ctx.fillStyle = 'rgba(160,120,140,.7)';
+    /* always show: index 0, last, and 3 evenly spread middle indices */
+    var labelIdxs = [];
+    if (n <= 5) {
+      for (var li = 0; li < n; li++) labelIdxs.push(li);
+    } else {
+      labelIdxs = [0,
+        Math.round((n-1) * 0.25),
+        Math.round((n-1) * 0.5),
+        Math.round((n-1) * 0.75),
+        n - 1
+      ];
+    }
+    labelIdxs.forEach(function(idx) {
+      var label = fmtDate(dates[idx]);
+      ctx.textAlign = idx === 0 ? 'left' : idx === n - 1 ? 'right' : 'center';
+      ctx.fillText(label, pts[idx].x, h - 3);
+    });
   });
 }
 
