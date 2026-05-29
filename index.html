@@ -102,14 +102,14 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .flw-hint{font-size:11px;color:var(--accent);font-weight:600;margin-top:2px}
 .flw-graph{flex:1;margin-top:10px;min-height:50px}
 .flw-graph canvas{display:block;width:100%;height:72px}
-.smtiles{display:flex;flex-direction:column;gap:12px;min-width:150px}
+.smtiles{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:12px;min-width:200px}
 .stile{background:var(--cbg);border-radius:16px;padding:13px 18px;box-shadow:var(--shsk);position:relative;overflow:hidden;flex:1;display:flex;flex-direction:column;justify-content:center;cursor:pointer;transition:box-shadow .15s,transform .12s}
 .stile::after{content:'';position:absolute;top:0;left:8%;right:8%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.95),transparent)}
 .stile:hover{transform:translateY(-1px);box-shadow:var(--shmd)}
 .stile.active{box-shadow:inset 0 2px 8px rgba(0,0,0,.12),0 1px 3px rgba(0,0,0,.08);transform:translateY(1px);border:1.5px solid var(--accent)}
 .stile-val{font-size:20px;font-weight:700;color:var(--text-1);line-height:1;margin-bottom:3px}
 .stile-lbl{font-size:10px;color:var(--text-m);font-weight:600;text-transform:uppercase;letter-spacing:.07em}
-/* platform filter tile — nav-bar background */
+/* platform + format filter tiles — nav-bar background */
 .stile-plat-tile{background:var(--bg-header) !important}
 .stile-plat-icons{display:flex;gap:5px;align-items:center;margin-bottom:5px}
 .plat-icon-svg{width:18px;height:18px;color:var(--accent);opacity:.75;flex-shrink:0}
@@ -127,6 +127,14 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .sort-btn{background:var(--cbg);border:1px solid var(--sborder);border-radius:var(--pill);padding:4px 11px;font-size:11px;font-weight:500;color:var(--text-2);cursor:pointer;font-family:'Nunito',sans-serif;transition:all .14s;box-shadow:var(--shsm)}
 .sort-btn:hover{background:var(--accent-light);color:var(--accent-deep)}
 .sort-btn.active{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;box-shadow:0 3px 10px rgba(200,60,150,.22)}
+.sort-divider{width:1px;height:18px;background:var(--div);margin:0 4px;flex-shrink:0}
+/* noteworthy + rest divider */
+.cstack-noteworthy{display:flex;align-items:center;gap:12px;padding:6px 0 8px}
+.cstack-noteworthy::before,.cstack-noteworthy::after{content:'';flex:1;height:1px;background:var(--div)}
+.cstack-noteworthy-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-m);white-space:nowrap}
+.cstack-rest-divider{display:flex;align-items:center;gap:12px;padding:6px 0 8px}
+.cstack-rest-divider::before,.cstack-rest-divider::after{content:'';flex:1;height:1px;background:var(--div)}
+.cstack-rest-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--text-m);white-space:nowrap}
 
 /* KANBAN */
 .kanban{display:flex;gap:14px;padding:0 28px 48px;overflow-x:auto;flex:1;align-items:flex-start}
@@ -455,9 +463,9 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   .kanban{padding:0 14px 48px;gap:10px}
   .pcol{flex:0 0 210px;min-width:210px}
 
-  /* STATS — posts and collabs side by side, full width */
-  .smtiles{display:flex;flex-direction:row;gap:10px;width:100%}
-  .smtiles .stile{flex:1;min-width:0}
+  /* STATS — 2x2 grid of tiles */
+  .smtiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+  .smtiles .stile{min-width:0}
 }
 
 .hdr-mob-em{display:none}
@@ -508,6 +516,10 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   <div class="smtiles">
     <div class="stile"><div class="stile-val" id="st-posts">0</div><div class="stile-lbl">Posts logged</div></div>
     <div class="stile" id="stile-collabs"><div class="stile-val" id="st-collabs">0</div><div class="stile-lbl">Collabs</div></div>
+    <div class="stile stile-plat-tile" id="stile-fmt">
+      <div class="stile-val" id="st-fmt-val" style="font-size:13px;font-weight:700">All</div>
+      <div class="stile-lbl stile-plat-lbl">Format</div>
+    </div>
     <div class="stile stile-plat-tile" id="stile-plat" title="Filter by platform">
       <div class="stile-plat-icons" id="st-plat-icons">
         <svg class="plat-icon-svg" viewBox="0 0 1024 1024"><path d="M512 378.7c-73.4 0-133.3 59.9-133.3 133.3S438.6 645.3 512 645.3 645.3 585.4 645.3 512 585.4 378.7 512 378.7zM911.8 512c0-55.2.5-109.9-2.6-165-3.1-64-17.7-120.8-64.5-167.6-46.9-46.9-103.6-61.4-167.6-64.5-55.2-3.1-109.9-2.6-165-2.6-55.2 0-109.9-.5-165 2.6-64 3.1-120.8 17.7-167.6 64.5C132.6 226.3 118.1 283 115 347c-3.1 55.2-2.6 109.9-2.6 165s-.5 109.9 2.6 165c3.1 64 17.7 120.8 64.5 167.6 46.9 46.9 103.6 61.4 167.6 64.5 55.2 3.1 109.9 2.6 165 2.6 55.2 0 109.9.5 165-2.6 64-3.1 120.8-17.7 167.6-64.5 46.9-46.9 61.4-103.6 64.5-167.6 3.2-55.1 2.6-109.8 2.6-165zM512 717.1c-113.5 0-205.1-91.6-205.1-205.1S398.5 306.9 512 306.9 717.1 398.5 717.1 512 625.5 717.1 512 717.1zm213.5-370.7c-26.5 0-47.9-21.4-47.9-47.9s21.4-47.9 47.9-47.9 47.9 21.4 47.9 47.9a47.84 47.84 0 0 1-47.9 47.9z" fill="currentColor"/></svg>
@@ -522,23 +534,24 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 <div class="divrow"><div class="divline"></div><div class="divlbl">Content board</div><div class="divline"></div></div>
 
 <div class="toolbar">
-  <span class="tbar-lbl">Sort by</span>
-  <button class="sort-btn active" data-sort="manual">Manual rank</button>
+  <span class="tbar-lbl">Lens</span>
+  <button class="sort-btn active" data-sort="manual">Overall</button>
   <button class="sort-btn" data-sort="views">Views</button>
   <button class="sort-btn" data-sort="saves">Saves</button>
   <button class="sort-btn" data-sort="shares">Shares</button>
-  <button class="sort-btn" data-sort="followers">Followers Gained</button>
+  <button class="sort-btn" data-sort="followers">Followers</button>
+  <div class="sort-divider"></div>
   <button class="sort-btn" data-sort="date-new">Date ↓</button>
   <button class="sort-btn" data-sort="date-old">Date ↑</button>
   <!-- mobile dropdown -->
   <div class="sort-mobile-wrap">
-    <span class="sort-mobile-lbl">Sort by</span>
+    <span class="sort-mobile-lbl">Lens</span>
     <select class="sort-mobile-sel" id="sort-mobile-sel">
-      <option value="manual">Manual rank</option>
+      <option value="manual">Overall</option>
       <option value="views">Views</option>
       <option value="saves">Saves</option>
       <option value="shares">Shares</option>
-      <option value="followers">Followers Gained</option>
+      <option value="followers">Followers</option>
       <option value="date-new">Date — newest first</option>
       <option value="date-old">Date — oldest first</option>
     </select>
@@ -1074,7 +1087,8 @@ function renderStats() {
 }
 
 var collabFilter = false;
-var platFilter = null; /* null = off, 'ig'/'tt'/'yt' = active */
+var platFilter = null;
+var fmtFilter  = null;
 
 /* ── KANBAN ── */
 function renderKanban() {
@@ -1084,13 +1098,12 @@ function renderKanban() {
       if(p.pillar!==String(col)) return false;
       if(collabFilter && !p.collab && !p.paid) return false;
       if(platFilter){ var pl=p.platforms||{}; if(!pl[platFilter]) return false; }
+      if(fmtFilter && p.format !== fmtFilter) return false;
       return true;
     });
 
-    /* ensure all posts have an ord for current sort */
     initSortOrds(col, sort);
 
-    /* sort: pinned always float to top, then by sort key */
     var isDateSort = (sort === 'date-new' || sort === 'date-old');
     pp.sort(function(a,b){
       var ap=isPinned(a,sort)?1:0, bp=isPinned(b,sort)?1:0;
@@ -1098,7 +1111,6 @@ function renderKanban() {
       if(isDateSort){
         var da = a.dateUploaded || '';
         var db = b.dateUploaded || '';
-        /* posts without a date go to the end */
         if(!da && !db) return 0;
         if(!da) return 1;
         if(!db) return -1;
@@ -1108,7 +1120,35 @@ function renderKanban() {
     });
 
     stack.innerHTML='';
-    pp.forEach(function(post){ stack.appendChild(makeCard(post)); });
+
+    var pinnedPosts = pp.filter(function(p){ return isPinned(p,sort); });
+    var restPosts   = pp.filter(function(p){ return !isPinned(p,sort); });
+
+    /* NOTEWORTHY section */
+    if(pinnedPosts.length > 0){
+      var nwDiv = document.createElement('div');
+      nwDiv.className = 'cstack-noteworthy';
+      var nwLbl = document.createElement('span');
+      nwLbl.className = 'cstack-noteworthy-lbl';
+      nwLbl.textContent = 'Noteworthy content';
+      nwDiv.appendChild(nwLbl);
+      stack.appendChild(nwDiv);
+      pinnedPosts.forEach(function(post){ stack.appendChild(makeCard(post)); });
+    }
+
+    /* THE REST section */
+    if(restPosts.length > 0){
+      if(pinnedPosts.length > 0){
+        var restDiv = document.createElement('div');
+        restDiv.className = 'cstack-rest-divider';
+        var restLbl = document.createElement('span');
+        restLbl.className = 'cstack-rest-lbl';
+        restLbl.textContent = 'the rest';
+        restDiv.appendChild(restLbl);
+        stack.appendChild(restDiv);
+      }
+      restPosts.forEach(function(post){ stack.appendChild(makeCard(post)); });
+    }
 
     /* + add button */
     var addBtn=document.createElement('button');
@@ -1116,7 +1156,6 @@ function renderKanban() {
     (function(c){ addBtn.addEventListener('click',function(){ openLog(c); }); })(col);
     stack.appendChild(addBtn);
 
-    /* count all posts in pillar (unfiltered) */
     var allInCol=posts.filter(function(p){return p.pillar===String(col);});
     document.getElementById('pct'+col).textContent=allInCol.length+' post'+(allInCol.length!==1?'s':'');
   }
@@ -1585,6 +1624,16 @@ document.getElementById('flw-tile').addEventListener('click',openFlw);
 document.getElementById('stile-collabs').addEventListener('click',function(){
   collabFilter=!collabFilter;
   this.classList.toggle('active',collabFilter);
+  renderKanban();
+});
+
+/* format filter tile — cycles Reel → Carousel → Static → off */
+document.getElementById('stile-fmt').addEventListener('click',function(){
+  var cycle = [null,'Reel','Carousel','Static'];
+  var cur = cycle.indexOf(fmtFilter);
+  fmtFilter = cycle[(cur+1) % cycle.length];
+  document.getElementById('st-fmt-val').textContent = fmtFilter || 'All';
+  this.classList.toggle('active', fmtFilter !== null);
   renderKanban();
 });
 
