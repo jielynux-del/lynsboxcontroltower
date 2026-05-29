@@ -176,6 +176,9 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 .bpin{background:var(--accent-light);color:var(--accent-deep);font-size:10px;padding:1px 5px}
 .clink{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;color:var(--accent-deep);text-decoration:none;padding:2px 7px;border-radius:var(--pill);background:var(--accent-light);width:fit-content}
 .clink:hover{opacity:.85}
+.cplatforms{display:flex;gap:3px;position:absolute;bottom:6px;right:6px;z-index:1}
+.cplat{font-size:12px;line-height:1;opacity:.75;cursor:default}
+.cplatforms .cplat[title]:hover{opacity:1}
 .cactions{display:none}
 .card:hover .cactions{display:none}
 .ckebab-btn{display:flex;position:absolute;top:6px;right:6px;background:var(--cbg);border:1px solid var(--cborder);border-radius:7px;width:24px;height:24px;cursor:pointer;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--text-2);box-shadow:var(--shsm);z-index:2;line-height:1}
@@ -491,6 +494,10 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
   <div class="smtiles">
     <div class="stile"><div class="stile-val" id="st-posts">0</div><div class="stile-lbl">Posts logged</div></div>
     <div class="stile" id="stile-collabs"><div class="stile-val" id="st-collabs">0</div><div class="stile-lbl">Collabs</div></div>
+    <div class="stile" id="stile-plat" title="Filter by platform">
+      <div class="stile-val" id="st-plat-icons" style="font-size:16px;letter-spacing:2px">📸🎵▶️</div>
+      <div class="stile-lbl">Filter platform</div>
+    </div>
   </div>
 </div>
 
@@ -551,6 +558,12 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
     <label class="cblbl"><input type="checkbox" id="fi-paid"> Paid</label>
     <label class="cblbl"><input type="checkbox" id="fi-series"> Series</label>
   </div>
+  <div class="fgrp"><label class="flbl">Posted on</label>
+  <div class="cbrow" style="margin-bottom:0">
+    <label class="cblbl"><input type="checkbox" id="fi-plat-ig"> 📸 Instagram</label>
+    <label class="cblbl"><input type="checkbox" id="fi-plat-tt"> 🎵 TikTok</label>
+    <label class="cblbl"><input type="checkbox" id="fi-plat-yt"> ▶️ YouTube</label>
+  </div></div>
   </div>
 </div></div>
 
@@ -581,6 +594,12 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
     <label class="cblbl"><input type="checkbox" id="ei-paid"> Paid</label>
     <label class="cblbl"><input type="checkbox" id="ei-series"> Series</label>
   </div>
+  <div class="fgrp"><label class="flbl">Posted on</label>
+  <div class="cbrow" style="margin-bottom:0">
+    <label class="cblbl"><input type="checkbox" id="ei-plat-ig"> 📸 Instagram</label>
+    <label class="cblbl"><input type="checkbox" id="ei-plat-tt"> 🎵 TikTok</label>
+    <label class="cblbl"><input type="checkbox" id="ei-plat-yt"> ▶️ YouTube</label>
+  </div></div>
   </div>
 </div></div>
 
@@ -950,10 +969,12 @@ function drawSpark() {
   var chartW = w - PAD_L - PAD_R;
   var chartH = h - PAD_T - PAD_B;
   var mn = Math.min.apply(null, data), mx = Math.max.apply(null, data), rng = mx - mn || 1;
-  /* all data points plotted, spread evenly across full width */
+  /* use actual timestamps for x so gaps between dates are proportional */
+  var timestamps = followers.map(function(e){ return e.ts || 0; });
+  var tMin = Math.min.apply(null, timestamps), tMax = Math.max.apply(null, timestamps), tRng = tMax - tMin || 1;
   var pts = data.map(function(v, i) {
     return {
-      x: PAD_L + (i / (data.length - 1)) * chartW,
+      x: PAD_L + ((timestamps[i] - tMin) / tRng) * chartW,
       y: PAD_T + chartH - ((v - mn) / rng) * chartH
     };
   });
@@ -1016,6 +1037,7 @@ function renderStats() {
 }
 
 var collabFilter = false;
+var platFilter = null; /* null = off, 'ig'/'tt'/'yt' = active */
 
 /* ── KANBAN ── */
 function renderKanban() {
@@ -1024,6 +1046,7 @@ function renderKanban() {
     var pp=posts.filter(function(p){
       if(p.pillar!==String(col)) return false;
       if(collabFilter && !p.collab && !p.paid) return false;
+      if(platFilter){ var pl=p.platforms||{}; if(!pl[platFilter]) return false; }
       return true;
     });
 
@@ -1105,6 +1128,17 @@ function makeCard(post) {
     var lk=document.createElement('a'); lk.className='clink'; lk.href=post.igurl; lk.target='_blank'; lk.rel='noopener'; lk.textContent='↗ view post';
     right.appendChild(lk);
   }
+
+  /* platform icons — bottom right of card */
+  var plat = post.platforms || {};
+  if (plat.ig || plat.tt || plat.yt) {
+    var platDiv = document.createElement('div'); platDiv.className='cplatforms';
+    if (plat.ig) { var pig=document.createElement('span'); pig.className='cplat'; pig.textContent='📸'; pig.title='Instagram'; platDiv.appendChild(pig); }
+    if (plat.tt) { var ptt=document.createElement('span'); ptt.className='cplat'; ptt.textContent='🎵'; ptt.title='TikTok'; platDiv.appendChild(ptt); }
+    if (plat.yt) { var pyt=document.createElement('span'); pyt.className='cplat'; pyt.textContent='▶️'; pyt.title='YouTube'; platDiv.appendChild(pyt); }
+    card.appendChild(platDiv);
+  }
+
   card.appendChild(right);
 
   /* action buttons */
@@ -1240,6 +1274,9 @@ function openLog(pillarNum) {
   document.getElementById('fi-collab').checked=false;
   document.getElementById('fi-paid').checked=false;
   document.getElementById('fi-series').checked=false;
+  document.getElementById('fi-plat-ig').checked=false;
+  document.getElementById('fi-plat-tt').checked=false;
+  document.getElementById('fi-plat-yt').checked=false;
   document.getElementById('fi-pillar').value=String(pillarNum||1);
   document.getElementById('fi-format').value='Reel';
   document.getElementById('m-log').classList.add('open');
@@ -1263,6 +1300,11 @@ function savePost() {
     collab:document.getElementById('fi-collab').checked,
     paid:document.getElementById('fi-paid').checked,
     series:document.getElementById('fi-series').checked,
+    platforms:{
+      ig:document.getElementById('fi-plat-ig').checked,
+      tt:document.getElementById('fi-plat-tt').checked,
+      yt:document.getElementById('fi-plat-yt').checked
+    },
     pinned:false, pinnedIn:{}
   };
   /* set ord for all sort views */
@@ -1293,6 +1335,10 @@ function openEdit(id) {
   document.getElementById('ei-collab').checked=post.collab;
   document.getElementById('ei-paid').checked=post.paid;
   document.getElementById('ei-series').checked=post.series||false;
+  var plat=post.platforms||{};
+  document.getElementById('ei-plat-ig').checked=plat.ig||false;
+  document.getElementById('ei-plat-tt').checked=plat.tt||false;
+  document.getElementById('ei-plat-yt').checked=plat.yt||false;
   document.getElementById('m-edit').classList.add('open');
   requestAnimationFrame(function(){ requestAnimationFrame(function(){ document.getElementById('m-edit').classList.add('mbg-visible'); }); });
 }
@@ -1310,6 +1356,11 @@ function saveEdit() {
   post.collab=document.getElementById('ei-collab').checked;
   post.paid=document.getElementById('ei-paid').checked;
   post.series=document.getElementById('ei-series').checked;
+  post.platforms={
+    ig:document.getElementById('ei-plat-ig').checked,
+    tt:document.getElementById('ei-plat-tt').checked,
+    yt:document.getElementById('ei-plat-yt').checked
+  };
   save(); closeEdit(); renderKanban();
 }
 
@@ -1430,6 +1481,17 @@ document.getElementById('flw-tile').addEventListener('click',openFlw);
 document.getElementById('stile-collabs').addEventListener('click',function(){
   collabFilter=!collabFilter;
   this.classList.toggle('active',collabFilter);
+  renderKanban();
+});
+
+/* platform filter tile — cycles ig → tt → yt → off */
+document.getElementById('stile-plat').addEventListener('click',function(){
+  var cycle = [null,'ig','tt','yt'];
+  var cur = cycle.indexOf(platFilter);
+  platFilter = cycle[(cur+1) % cycle.length];
+  var icons = {'ig':'📸 Instagram','tt':'🎵 TikTok','yt':'▶️ YouTube',null:'📸🎵▶️'};
+  document.getElementById('st-plat-icons').textContent = icons[platFilter] || '📸🎵▶️';
+  this.classList.toggle('active', platFilter !== null);
   renderKanban();
 });
 document.getElementById('btn-fcancel').addEventListener('click',closeLog);
