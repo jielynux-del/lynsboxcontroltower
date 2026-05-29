@@ -866,6 +866,7 @@ function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t==='princess' ? '' : t);
   localStorage.setItem('lcc-theme', t);
   renderThemePills();
+  drawSpark();
 }
 function renderThemePills() {
   var c = document.getElementById('theme-pills'); if (!c) return;
@@ -996,17 +997,18 @@ function drawSpark() {
       y: PAD_T + chartH - ((v - mn) / rng) * chartH
     };
   });
-  /* line — straight segments, no smoothing, so line passes exactly through each point */
-  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
-  for (var i = 1; i < pts.length; i++) {
-    ctx.lineTo(pts[i].x, pts[i].y);
-  }
-  ctx.strokeStyle = ac.line; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
-  /* fill */
+  /* fill — separate path so it doesn't interfere with stroke */
+  ctx.beginPath(); ctx.moveTo(pts[0].x, PAD_T + chartH);
+  ctx.lineTo(pts[0].x, pts[0].y);
+  for (var i = 1; i < pts.length; i++) { ctx.lineTo(pts[i].x, pts[i].y); }
   ctx.lineTo(pts[pts.length-1].x, PAD_T + chartH);
-  ctx.lineTo(pts[0].x, PAD_T + chartH);
   ctx.closePath();
   ctx.fillStyle = ac.fill; ctx.fill();
+
+  /* line — drawn on top of fill */
+  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+  for (var i = 1; i < pts.length; i++) { ctx.lineTo(pts[i].x, pts[i].y); }
+  ctx.strokeStyle = ac.line; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
   /* dot at last point */
   var last = pts[pts.length-1];
   ctx.beginPath(); ctx.arc(last.x, last.y, 4, 0, Math.PI*2); ctx.fillStyle = ac.dot; ctx.fill();
