@@ -666,7 +666,6 @@ html,body{height:100%;background:var(--bg);font-family:'Nunito',sans-serif;color
 <script type="module">
 import { initializeApp }            from 'https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js';
 import { getFirestore, doc, getDoc, setDoc, onSnapshot } from 'https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js';
-import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'https://www.gstatic.com/firebasejs/12.13.0/firebase-storage.js';
 
 const _app = initializeApp({
   apiKey:            'AIzaSyAgImQTrgnVVQ5JurVMA_p1HcNS0MOWtG8',
@@ -677,7 +676,6 @@ const _app = initializeApp({
   appId:             '1:666418715980:web:5a77a3f13748111aa283e9'
 });
 const _db      = getFirestore(_app);
-const _storage = getStorage(_app);
 const _dataDoc = doc(_db, 'lcc', 'main');
 
 /* module scripts are deferred — DOM is always ready by the time this runs */
@@ -1438,14 +1436,18 @@ function renderFlwHistory(){
   });
 }
 
-/* ── THUMB UPLOAD ── */
-/* ── THUMBNAIL UPLOAD (Firebase Storage) ── */
-async function uploadToStorage(file, postId) {
-  var ext = file.name.split('.').pop() || 'jpg';
-  var path = 'thumbs/' + postId + '_' + Date.now() + '.' + ext;
-  var storageRef = ref(_storage, path);
-  await uploadBytes(storageRef, file);
-  return await getDownloadURL(storageRef);
+/* ── THUMBNAIL UPLOAD (Cloudinary) ── */
+var _CLOUD = 'dzu7mbxiz';
+var _PRESET = 'ml_default';
+
+async function uploadToStorage(file) {
+  var fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', _PRESET);
+  var res = await fetch('https://api.cloudinary.com/v1_1/' + _CLOUD + '/image/upload', {method:'POST', body:fd});
+  if (!res.ok) throw new Error('Cloudinary upload failed: ' + res.status);
+  var data = await res.json();
+  return data.secure_url;
 }
 
 function setThumbZone(zoneEl, url) {
@@ -1472,8 +1474,7 @@ function thumbUpload(file, zoneId, urlId) {
   var zone = document.getElementById(zoneId);
   var urlInput = document.getElementById(urlId);
   zone.innerHTML = '<span style="font-size:11px;color:var(--accent-deep);font-weight:600">Uploading...</span>';
-  var tempId = 'tmp_' + Date.now();
-  uploadToStorage(file, tempId).then(function(url) {
+  uploadToStorage(file).then(function(url) {
     urlInput.value = url;
     setThumbZone(zone, url);
   }).catch(function(err) {
@@ -1485,7 +1486,7 @@ function thumbUpload(file, zoneId, urlId) {
 function cardThumbUpload(file, postId) {
   if (!file) return;
   var post = posts.find(function(p){ return p.id === postId; }); if (!post) return;
-  uploadToStorage(file, postId).then(function(url) {
+  uploadToStorage(file).then(function(url) {
     post.thumb = url; save(); renderKanban();
   }).catch(function(err){ console.warn('Card thumb upload failed', err); });
 }
